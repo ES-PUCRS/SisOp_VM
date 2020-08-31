@@ -1,0 +1,56 @@
+plugins {
+    // Apply the groovy plugin to add support for Groovy
+    id 'groovy'
+
+    // Apply the application plugin to add support for building a CLI application.
+    id 'application'
+}
+
+application {
+    // Define the main class for the application.
+    mainClassName = 'sisop.oliveiracley.VM'
+}
+
+repositories {
+    // Manage packages from Maven Central repository
+    // https://repo.maven.apache.org/maven2/ 
+    mavenCentral()
+}
+
+
+dependencies {
+    // <LANGUAGE> Groovy
+    implementation 'org.codehaus.groovy:groovy:3.0.3'
+   
+	// <TESTS> JUnit 5 
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+}
+
+// Tests configuration
+test {
+    useJUnitPlatform()
+    failFast = true
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+    }
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "\nTest summary {                           \n" +
+                    "\t${result.testCount} tests found          \n" +
+                    "\t-------------                            \n" +
+                    "\t${result.successfulTestCount} succeeded, \n" +
+                    "\t${result.failedTestCount} failed,        \n" +
+                    "\t${result.skippedTestCount} skipped       \n" +
+                    "}"
+        }
+    }
+
+    filter {
+        //include all classes with Test suffix
+        includeTestsMatching "*Test"
+
+        //include all tests from package
+        includeTestsMatching "sisop.oliveiracley.*"
+    }
+}
