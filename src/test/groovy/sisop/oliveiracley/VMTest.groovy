@@ -1,4 +1,4 @@
-package verval.oliveiracley
+package sisop.oliveiracley
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.DisplayName;
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class VMTest {
 
 	@Test
-	@DisplayName("Test sample due to init project")
+	@DisplayName("Sample test due to init project")
     void initProject() {
         assertEquals(true,true);
     }

@@ -4,11 +4,25 @@ plugins {
 
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
+
+    // Lombok plugin
+    // id "io.freefair.lombok" version "5.1.1"
 }
 
 application {
     // Define the main class for the application.
     mainClassName = 'sisop.oliveiracley.VM'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs= ["src/main/groovy"]
+        }
+        resources {
+            srcDirs= ["src/main/resources"]
+        }
+    }
 }
 
 repositories {

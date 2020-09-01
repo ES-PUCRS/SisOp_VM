@@ -1,17 +1,67 @@
-# Verificação e Validação de Software
-Professor Bernardo Copstein  
-Introdução ao Teste Unitário
-## Exercícios sobre uso básico de JUnit para entregar
+# Sistemas Operacionais
+Professor Fernando Luís Dotti
+Desenvolvimento da maquina virtual
 
-1. Uma  indústria  de  chocolate  tem  de  despachar  para  seus  clientes  pacotes  com  diferentes pesos.  As  barras  são  produzidas  com  dois  pesos:  1Kg  e  5Kg.  Precisa-se  saber  quantas barras  de  cada  peso  deve-se  enviar  para  cada  cliente  sabendo  que  a  prioridade  é  enviar barras  de  5Kg.  A  classe  “Encomenda”  que  segue  possui  um  método  chamado “qtdadeBarras”.  Este  retorna  um  arranjo  com  duas  posições:  a  primeira  indica  a quantidade  de  barras  de  5Kg  e  a  segunda  a  quantidade  de  barras  de  1Kg  necessárias para  completar  a  encomenda.  O  “esqueleto  da  classe’  pode  ser  visto  abaixo. Implemente  um  driver  de  teste  capaz  de  testar  a  classe  adequadamente.  Em  seguida implemente a classe e verifique a qualidade de sua implementação
+## Projeto de desenvolvimento da VM
 
-~~~Java
-class Encomenda{
-	int[] qtdadeBarras(int peso){
-			...
-	}
-}
-~~~
+### 1. Definição da Máquina Virtual (MV)
+Nossa máquina virtual (MV) tem CPU e Memória.
+
+- [x] 1.1 CPU
+O processador possui os seguintes registradores:
+• um contador de instruções (PC)
+• Um registrados de instruções (IR)
+• oito registradores, 0 a 7
+O conjunto de instruções é apresentado na tabela a seguir, adaptado de [1].
+A tabela atual está revisada para não ter mais operações a nível de bit. As colunas em vermelho substituem a codificação em
+bits para designar os registradores e parâmetros utilizados, e compõem os “campos" de uma posicaoDeMemoria vide 1.2.
+
+- [x] 1.2 Memória
+Considere a memória como um array contíguo de posições de memória. Cada posição de memória são 4 bytes. A memória
+tem 1024 posições.
+ tamMemoria = 1024
+ array mem[tamMemoria] of posicaoDeMemoria
+Cada posiçãoDeMemória codifica [ OPCODE, 1 REG de 1..8, 1 REG de 1..8, PARAMETRO K OU A conforme operação ]. Em um sistema real
+estes dados são codificados em bits de uma palavra. No nosso trabalho, podemos adotar que uma posicaoDeMemoria é um
+registro (objeto) com estes atributos. Note que no caso da posição de memória não ter uma instrução, temos que adotar
+então uma codificação própria. Neste caso podemos ter um OPCODE especial para significar uma posição de dados, e, no
+campo de K ou A, temos um valor inteiro. Um valor inteiro é suficiente pois a nossa arquitetura manipulará inteiros apenas.
+
+- [x] 1.3 Funcionamento da CPU: o ciclo de instruções
+A CPU executa o ciclo de instruções. Dado um valor no PC, ela faz:
+ Loop
+ busca a posição de memória apontada por PC, carrega no RI
+ Decodifica o RI
+ se RI inválido - sinaliza interrupção, acaba esta instrução
+ executa operação
+ Se erro: sinaliza interrupcao, acaba esta instrução
+ conforme operação efetua a mesma e atualiza PC
+ se existe interrupção
+ desvia para rotina de tratamento
+ fimLoop
+Um vetor de interrupções associa o código da interrupção com a rotina a ser executada.
+
+- [ ] 1.4 Programas
+Neste momento não temos um Sistema Operacional. Para fazer a Máquina Virtual funcionar, você deve carregar um
+programa no início da memória, atribuir um valor ao PC (o início do código do seu programa), e liberar a CPU para executar.
+A CPU vai executar até parar, encontrar um erro, ou então vai entrar em loop conforme o programa estiver correto ou não.
+Você deve criar formas de acompanhar esta evolução.
+Nossos programas podem ser escritos em TXT e lidos para a memória, ou então eles podem ser codificados em Java como a
+criação de um vetor de posicaoDeMemoria inicializado em cada posição do vetor como uma linha do programa.
+A seguir o programa P1, que escreve em posições sabidas de memória os 10 números da sequência de Fibonacci. Ou seja,
+ao final do programa a memória tem estes 10 números em posições convencionadas no programa. Avalie se P1 está
+correto.
+Como parte do exercício, construa P2, um programa que le um valor de uma determinada posição (carregada no inicio),
+ se o número for menor que zero coloca -1 no início da posição de memória para saída;
+ se for maior que zero este é o número de valores
+ da sequencia de fibonacci a serem escritos em sequencia a partir de uma posição de
+ memoria;
+
+
+
+
+
+
 
 ## Pre-requisitos
 1. Instalar o Gradle 6.6.1 (adicionar nas variaveis de ambiente do sistema);

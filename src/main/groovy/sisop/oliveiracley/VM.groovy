@@ -1,12 +1,12 @@
-package verval.oliveiracley
+package sisop.oliveiracley
 
-import java.lang.Integer
-import java.lang.RuntimeException
+import sisop.oliveiracley.processor.CPU;
 
 class VM {
 
-    static void main(String[] args) {
-        println "It's alive!"    
+    public static void main(String[] args) {
+         CPU.getInstance()
+        	.run()
     }
 
 }
