@@ -30,6 +30,7 @@ class CPU {
 
 	// Singleton constructor
 	private CPU(){
+		// println HardDrive.readFile("Assembly_01")?.text
 		interrupt = Interrupts.NoInterrupt
 		
 		memory = Memory.getInstance()
