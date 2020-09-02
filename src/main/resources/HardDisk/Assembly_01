@@ -1,3 +1,4 @@
 CONF	0,10,1
-LDX		r1,r2
-STX		r3,r5
+CONF	10,13,1
+STX		r0,5
+STOP

@@ -93,7 +93,7 @@ class CPU {
 	}
 
 	def registerDump(){
-		println "\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		println "\n\t       ${ANSI.CYAN_BACKGROUND} REGISTER DUMP ${ANSI.RESET}"
 		registers.eachWithIndex{ reg, i ->
 			print "[R${i}] = ${reg}\t"
 			if(i == 2 || i == 5)
