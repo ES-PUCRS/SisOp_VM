@@ -30,7 +30,6 @@ class CPU {
 
 	// Singleton constructor
 	private CPU(){
-		HardDrive.readFile("Assembly_01")
 		interrupt = Interrupts.NoInterrupt
 		
 		memory = Memory.getInstance()
@@ -107,8 +106,8 @@ class CPU {
 		// if(interrupt != Interrupts.STOP)
 		// 	println("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")		
 		// else
-			registerDump()
-			memory.dump(0..5)
+			// registerDump()
+			// memory.dump(0..5)
 
 	}
 
@@ -136,4 +135,23 @@ class CPU {
 		memory.get(1).p 		= 0
 	
 	}
+
+
+
+	def readFile (String _file) {
+		try {
+			def file = this.getClass().getResource("/${_file}").text
+			println file
+
+		}catch(Exception e) {
+			println "${ANSI.RED_BOLD} Error reading file: ${ANSI.RED_UNDERLINE} ${_file} ${ANSI.RESET}"
+			println "${ANSI.WHITE}" 			+
+					"${ANSI.RED_BACKGROUND} " 	+ 
+						"${e.getMessage()}"		+
+					"${ANSI.RESET}"
+		}
+
+		// return file
+	}
+
 }

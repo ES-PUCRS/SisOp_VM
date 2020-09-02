@@ -49,6 +49,7 @@ gradlew.bat
 gradlew
 
 # Package Files #
+*.zip
 *.jar
 *.war
 *.ear

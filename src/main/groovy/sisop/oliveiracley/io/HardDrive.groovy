@@ -6,9 +6,9 @@ import sisop.oliveiracley.VM
 class HardDrive {
 
 	def static readFile (String _file) {
+		def file
 		try{
-			def file = VM.getClass().getResource("/Assembly_01").text
-			println file
+			file = new Object() { }.getClass().getResource("/${_file}")
 		}catch(Exception e) {
 			println "${ANSI.RED_BOLD} Error reading file: ${ANSI.RED_UNDERLINE} ${_file} ${ANSI.RESET}"
 			println "${ANSI.WHITE}" 			+
@@ -17,7 +17,7 @@ class HardDrive {
 					"${ANSI.RESET}"
 		}
 
-		// return file
+		return file //?.text
 	}
 
 

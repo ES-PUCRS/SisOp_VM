@@ -61,21 +61,28 @@ test {
     }
 
     filter {
-        //include all classes with Test suffix
+        // Include all classes with Test suffix
         includeTestsMatching "*Test"
 
-        //include all tests from package
+        // Include all tests from package
         includeTestsMatching "sisop.oliveiracley.*"
     }
 }
 
+
+//  TASKS ------------------
+
 task artifact(type: Zip){
-    from './'
+    
     include '*'
     include '*/**'
     exclude 'RELAESE_Artifact.zip'
     exclude '/.gradle'
     exclude '/build/**'
-    archiveName 'RELAESE_Artifact.zip'
-    destinationDir(file('./'))
+    into "SisOp_VM"
+
+    archiveFileName = 'RELAESE_Artifact.zip'
+    destinationDirectory = file('./')
+
+    from './'
 }
