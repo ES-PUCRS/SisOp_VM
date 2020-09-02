@@ -8,20 +8,26 @@ class CPU {
 	enum Interrupts {
 		NoInterrupt, InvalidAddress, InvalidInstruction, STOP;
 	}
-	//Instance variables ------------------------------------------------
-		private static CPU instance 	// Singleton instance
+	//Instance variables ------------------------------------------------------------
+		private static CPU instance 		// Singleton instance
 
-		private def Word ir 			// Instruction register
-		private Interrupts interrupt 	// Processor state
-		private int[] registers 		// Processor registers
-		private Memory memory 			// RAM Memory
-		private int base 				// Memory base access	(not use yet)
-		private int limit 				// Memory limit access	(not use yet)
-		private int pc 					// Program Counter
-		private Core core_1				// CPU Core 1
-	//-------------------------------------------------------------------
+		private def Word 	ir 				// Instruction register
+		private Interrupts 	interrupt 		// Processor state
+		private int[] 		registers 		// Processor registers
+		private Memory 		memory 			// RAM Memory
+		private int 		base 			// Memory base access	(not use yet)
+		private int 		limit 			// Memory limit access	(not use yet)
+		private int 		pc 				// Program Counter
+		private Core 		core_1			// CPU Core 1
 
-	// Singleton access 
+		private boolean 	registersOutput	// Enable registers output
+		private Range[]		memoryOutput	// Configuration to output memory dump
+	//--------------------------------------------------------------------------------
+
+
+	//-Singleton Class Configuration------------
+
+	// Singleton access
 	def static getInstance(){
 		if(!instance)
 			instance = new CPU()
@@ -30,7 +36,7 @@ class CPU {
 
 	// Singleton constructor
 	private CPU(){
-		// println HardDrive.readFile("Assembly_01")?.text
+		HardDrive.readFile("Assembly_01")
 		interrupt = Interrupts.NoInterrupt
 		
 		memory = Memory.getInstance()
@@ -42,6 +48,8 @@ class CPU {
 		pc = 0
 	}
 
+	//-CPU Instance Variables Access---------------------
+
 	def increment(){ pc++ }
 
 	def getRegister(int rs){
@@ -51,13 +59,7 @@ class CPU {
 			return registers[rs];
 	}
 
-	def getPC(){
-		return pc
-	}
-
 	def setRegister(int rs, p){
-		// println "RS:: " + rs
-		// println "PC:: " + pc
 		if((rs < 0) || (rs > 7))
 			interrupt = Interrupts.InvalidAddress
 		else
@@ -75,7 +77,31 @@ class CPU {
 			pc = _pc
 	}
 
+	// Output --------------------------------------------------------------
 
+	def setOutputConfiguration(
+			boolean _registersOutput,
+			Range[] _memoryOutput
+		){
+
+		registersOutput  	= _registersOutput
+		
+		if(!memoryOutput)
+			memoryOutput 	= _memoryOutput
+		else
+			memoryOutput 	+= _memoryOutput
+	}
+
+	def registerDump(){
+		println "\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		registers.eachWithIndex{ reg, i ->
+			print "[R${i}] = ${reg}\t"
+			if(i == 2 || i == 5)
+				println ""
+		}
+	}
+
+	// Runtime Auxiliar Methods --------------------
 	private boolean legal(int e) {
 		if ((e < base) || (e > limit)) {
 			interrupt = Interrupts.InvalidAddress
@@ -83,7 +109,7 @@ class CPU {
 		}
 		return true
 	}
-
+	// ---------------------------------------------
 	
 	def run(){
 
@@ -104,55 +130,43 @@ class CPU {
 			// @REPEAT
 		}
 
-		// if(interrupt != Interrupts.STOP)
-		// 	println("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")		
-		// else
-			// registerDump()
-			// memory.dump(0..5)
-
-	}
-
-	def registerDump(){
-		println "\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
-		registers.eachWithIndex{ reg, i ->
-			print "[R${i}] = ${reg}\t"
-			if(i == 2 || i == 5)
-				println ""
+		if(interrupt != Interrupts.STOP)
+			println("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")		
+		else {
+			if(registersOutput)
+				registerDump()
+			if(memoryOutput)
+				memory.dump(memoryOutput)
 		}
 	}
-
 
 
 	// HARD LOAD PROGRAM
 	def hardLoad(){
-		memory.get(0).OpCode	= Core.OPCODE.STX
-		memory.get(0).r1		= 0
-		memory.get(0).r2		= 5
-		memory.get(0).p 		= 0
-	
-		memory.get(1).OpCode	= Core.OPCODE.STOP
-		memory.get(1).r1		= 0
-		memory.get(1).r2		= 0
-		memory.get(1).p 		= 0
+		def index = 0;
+		memory.get(index).OpCode	= Core.OPCODE.CONF
+		memory.get(index).r1		= 0
+		memory.get(index).r2		= 5
+		memory.get(index).p 		= 0
+		index++
+
+		memory.get(index).OpCode	= Core.OPCODE.CONF
+		memory.get(index).r1		= 10
+		memory.get(index).r2		= 13
+		memory.get(index).p 		= 1
+		index++
+
+		memory.get(index).OpCode	= Core.OPCODE.STX
+		memory.get(index).r1		= 0
+		memory.get(index).r2		= 5
+		memory.get(index).p 		= 0
+		index++
+
+		memory.get(index).OpCode	= Core.OPCODE.STOP
+		memory.get(index).r1		= 0
+		memory.get(index).r2		= 0
+		memory.get(index).p 		= 0
+		index++
 	
 	}
-
-
-
-	def readFile (String _file) {
-		try {
-			def file = this.getClass().getResource("/${_file}").text
-			println file
-
-		}catch(Exception e) {
-			println "${ANSI.RED_BOLD} Error reading file: ${ANSI.RED_UNDERLINE} ${_file} ${ANSI.RESET}"
-			println "${ANSI.WHITE}" 			+
-					"${ANSI.RED_BACKGROUND} " 	+ 
-						"${e.getMessage()}"		+
-					"${ANSI.RESET}"
-		}
-
-		// return file
-	}
-
 }

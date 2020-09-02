@@ -32,11 +32,16 @@ class Memory {
 		}
 	}
 
-	def dump(Range range){
+	def dump(Range[] ranges){
 		println "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
-	  	memory.getAt(range)
-		      .eachWithIndex{ word, i ->
-				println "[${String.format( "%04d", i + range[0] )}] => " + word.toString()
-			}
+
+		ranges.eachWithIndex { range, i ->
+		  	memory.getAt(range)
+			      .eachWithIndex{ word, l ->
+					println "[${String.format( "%04d", l + range[0] )}] => " + word.toString()
+				}
+			if(i != ranges.size()-1)
+				println "\t\t     ..."
+		}
 	}
 }

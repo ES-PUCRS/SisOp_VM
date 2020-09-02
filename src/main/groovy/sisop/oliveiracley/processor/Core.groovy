@@ -3,8 +3,6 @@ package sisop.oliveiracley.processor
 class Core {
 
 	enum OPCODE {
-			 DATA, 	// Has data 
-			 ___,  	// Is null
 	/*==============================================================================================================*/	
 	/* No. |  OPCODE ||	    Syntax	   |  Micro-operation 		  | R1	|   R2	| P | Description					*/
 	/*=====[ J - TYPE  INSTRUCTIONS ]===============================================================================*/
@@ -31,7 +29,11 @@ class Core {
 	/* 19 */ STX,	 //	 STX [Rd],Rs   | [Rd] ← Rs				  |	Rd	|	Rs	|	| Indirect storage to memory	//
 	/*=====[ R1 - TYPE INSTRUCTIONS ]===============================================================================*/
 	/* 20 */ SWAP,	 //	SWAP Ra, Rb    | T ← Ra; Ra ← Rb; Rb ← T  |		|		|	| SWAP regs						//
-	/* 21 */ STOP	 // 			   |			 			  |		|		|	| HALT							//
+	/* 21 */ STOP,	 // 			   |			 			  |		|		|	| HALT							//
+	/*==============================================================================================================*/
+	/* -- */ CONF,	 // 			   |						  |		|		|	| Configure CPU output 			//
+	/* -- */ DATA, 	 // 			   |						  |		|		|	| Memory addess has data 		//
+	/* -- */ ___  	 // 			   |						  |		|		|	| Memory addess is empty		//
 	/*==============================================================================================================*/
 	}
 
@@ -262,6 +264,18 @@ class Core {
 	}
 
 
+	// Mine option
+	// Configure CPU output
+	def CONF (def word){
+		Range memoryOutput
+		if(word.r1 < 0 || word.r2 < 0)
+			memoryOutput = null
+		else
+			memoryOutput = word.r1..word.r2
+
+		cpu.setOutputConfiguration(word.p as boolean, [memoryOutput] as Range[])
+		cpu.increment()
+	}
 	/*==============================================================================================================*/
 
 	// HALT
@@ -273,5 +287,4 @@ class Core {
 	def ___ (def word){
 		cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
 	}
-
 }
