@@ -14,17 +14,16 @@ application {
     mainClassName = 'sisop.oliveiracley.VM'
 }
 
-sourceSets {
-    main {
-        groovy {
-            srcDirs= ["src/main/groovy"]
-        }
-        resources {
-            srcDirs= ["src/main/resources"]
-        }
-    }
-
-}
+// sourceSets {
+//     main {
+//         groovy {
+//             srcDirs= ["src/main/groovy"]
+//         }
+//         resources {
+//             srcDirs= ["src/main/resources"]
+//         }
+//     }
+// }
 
 repositories {
     // Manage packages from Maven Central repository
