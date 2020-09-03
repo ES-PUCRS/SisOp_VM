@@ -3,38 +3,38 @@ package sisop.oliveiracley.processor
 class Core {
 
 	enum OPCODE {
-	/*==============================================================================================================*/	
-	/* No. |  OPCODE ||	    Syntax	   |  Micro-operation 		  | R1	|   R2	| P | Description					*/
-	/*=====[ J - TYPE  INSTRUCTIONS ]===============================================================================*/
-	/* 01 */ JMP,	 //     JMP k 	   | PC ← k					  |		|		| K	| Direct jump					//
-	/* 02 */ JMPI,	 //    JMPI Rs     | PC ← Rs				  |	Rs	|		|   | Register jump					//
-	/* 03 */ JMPIG,	 //  JMPIG Rs, Rc  | Rc > 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if greater				//
-	/* 04 */ JMPIL,	 //  JMPIL Rs, Rc  | Rc < 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if less					//
-	/* 05 */ JMPIE,	 //  JMPIE Rs, Rc  | Rc = 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if equal	 				//
-	/* 06 */ JMPIM,	 // JMPIM  [A], Rc | PC ← [A]				  |		|		| A | Memory jump					//
-	/* 07 */ JMPIGM, // JMPIGM [A], Rc | Rc > 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if greater		//
-	/* 08 */ JMPILM, // JMPILM [A], Rc | Rc < 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if less			//
-	/* 09 */ JMPIEM, // JMPIEM [A], Rc | Rc = 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if equal			//
-	/*=====[ I - TYPE  INSTRUCTIONS ]===============================================================================*/
-	/* 10 */ ADDI,	 //	 ADDI Rd, k	   | Rd   ← Rd + k			  |	Rd	|		| K | Immediate addition			//
-	/* 11 */ SUBI,	 //	 SUBI Rd, k    | Rd   ← Rd - k			  |	Rd	|		| K | Immediate subtraction			//
-	/* 12 */ LDI,	 //	  LDI Rd, k	   | Rd   ← k				  |	Rd	|		| K | Load immediate 				//
-	/* 13 */ LDD,	 //	 LDD  Rd,[A]   | Rd   ← [A]				  |	Rd	|		| A | Load direct from data memory	//
-	/* 14 */ STD,	 //	 STD [A],Rs	   | [A]  ← Rs				  |	Rs	|		| A | Store direct to data memory	//
-	/*=====[ R2 - TYPE INSTRUCTIONS ]===============================================================================*/
-	/* 15 */ ADD,	 //	  ADD Rd, Rs   | Rd   ← Rd + Rs			  |	Rd	|	Rs	|	| Addition						//
-	/* 16 */ SUB,	 //	  SUB Rd, Rs   | Rd   ← Rd - Rs			  |	Rd	|	Rs	|	| Subtraction					//
-	/* 17 */ MULT,	 //	 MULT Rd,[Rs]  | Rd   ← Rd * Rs			  |	Rd	|	Rs	|	| Multiplication 				//
-	/* 18 */ LDX,	 //	 LDX  Rd,[Rs]  | Rd   ← [Rs]			  |	Rd	|	Rs	|	| Indirect load from memory		//
-	/* 19 */ STX,	 //	 STX [Rd],Rs   | [Rd] ← Rs				  |	Rd	|	Rs	|	| Indirect storage to memory	//
-	/*=====[ R1 - TYPE INSTRUCTIONS ]===============================================================================*/
-	/* 20 */ SWAP,	 //	SWAP Ra, Rb    | T ← Ra; Ra ← Rb; Rb ← T  |		|		|	| SWAP regs						//
-	/* 21 */ STOP,	 // 			   |			 			  |		|		|	| HALT							//
-	/*==============================================================================================================*/
-	/* -- */ CONF,	 // 			   |						  |		|		|	| Configure CPU output 			//
-	/* -- */ DATA, 	 // 			   |						  |		|		|	| Memory addess has data 		//
-	/* -- */ ___  	 // 			   |						  |		|		|	| Memory addess is empty		//
-	/*==============================================================================================================*/
+	/*======================================================================================================================*/	
+	/* No. | OPCODE  | Params |	    Syntax	   |  Micro-operation 		  | R1	|   R2	| P | Description					*/
+	/*=====[ J - TYPE  INSTRUCTIONS ]=======================================================================================*/
+	/* 01 */ JMP 		(1), //     JMP k 	   | PC ← k					  |		|		| K	| Direct jump					//
+	/* 02 */ JMPI 		(x), //    JMPI Rs     | PC ← Rs				  |	Rs	|		|   | Register jump					//
+	/* 03 */ JMPIG 		(x), //  JMPIG Rs, Rc  | Rc > 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if greater				//
+	/* 04 */ JMPIL 		(x), //  JMPIL Rs, Rc  | Rc < 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if less					//
+	/* 05 */ JMPIE 		(x), //  JMPIE Rs, Rc  | Rc = 0 ? PC ← Rs : PC++  |	Rs	|	Rc	|   | Jump if equal	 				//
+	/* 06 */ JMPIM 		(1), // JMPIM  [A], Rc | PC ← [A]				  |		|		| A | Memory jump					//
+	/* 07 */ JMPIGM 	(x), // JMPIGM [A], Rc | Rc > 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if greater		//
+	/* 08 */ JMPILM 	(x), // JMPILM [A], Rc | Rc < 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if less			//
+	/* 09 */ JMPIEM 	(x), // JMPIEM [A], Rc | Rc = 0 ? PC ← [A] : PC++ |		|	Rc	| A | Memory jump if equal			//
+	/*=====[ I - TYPE  INSTRUCTIONS ]=======================================================================================*/
+	/* 10 */ ADDI	 	(x), //	 ADDI Rd, k	   | Rd   ← Rd + k			  |	Rd	|		| K | Immediate addition			//
+	/* 11 */ SUBI	 	(x), //	 SUBI Rd, k    | Rd   ← Rd - k			  |	Rd	|		| K | Immediate subtraction			//
+	/* 12 */ LDI	 	(x), //	  LDI Rd, k	   | Rd   ← k				  |	Rd	|		| K | Load immediate 				//
+	/* 13 */ LDD	 	(x), //	 LDD  Rd,[A]   | Rd   ← [A]				  |	Rd	|		| A | Load direct from data memory	//
+	/* 14 */ STD	 	(x), //	 STD [A],Rs	   | [A]  ← Rs				  |	Rs	|		| A | Store direct to data memory	//
+	/*=====[ R2 - TYPE INSTRUCTIONS ]=======================================================================================*/
+	/* 15 */ ADD	 	(x), //	  ADD Rd, Rs   | Rd   ← Rd + Rs			  |	Rd	|	Rs	|	| Addition						//
+	/* 16 */ SUB	 	(x), //	  SUB Rd, Rs   | Rd   ← Rd - Rs			  |	Rd	|	Rs	|	| Subtraction					//
+	/* 17 */ MULT	 	(x), //	 MULT Rd,[Rs]  | Rd   ← Rd * Rs			  |	Rd	|	Rs	|	| Multiplication 				//
+	/* 18 */ LDX	 	(x), //	 LDX  Rd,[Rs]  | Rd   ← [Rs]			  |	Rd	|	Rs	|	| Indirect load from memory		//
+	/* 19 */ STX	 	(x), //	 STX [Rd],Rs   | [Rd] ← Rs				  |	Rd	|	Rs	|	| Indirect storage to memory	//
+	/*=====[ R1 - TYPE INSTRUCTIONS ]=======================================================================================*/
+	/* 20 */ SWAP	 	(x), //	SWAP Ra, Rb    | T ← Ra; Ra ← Rb; Rb ← T  |		|		|	| SWAP regs						//
+	/* 21 */ STOP	 	(x), // 			   |			 			  |		|		|	| HALT							//
+	/*======================================================================================================================*/
+	/* -- */ CONF	 	(x), // 			   |						  |		|		|	| Configure CPU output 			//
+	/* -- */ DATA 	 	(x), // 			   |						  |		|		|	| Memory addess has data 		//
+	/* -- */ ___		(0); // 			   |						  |		|		|	| Memory addess is empty		//
+	/*======================================================================================================================*/
 	}
 
 	private static Memory 	memory

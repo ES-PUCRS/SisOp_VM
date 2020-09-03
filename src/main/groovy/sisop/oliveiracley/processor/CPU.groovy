@@ -9,6 +9,7 @@ class CPU {
 	enum Interrupts {
 		NoInterrupt, InvalidAddress, InvalidInstruction, STOP;
 	}
+
 	//Instance variables ------------------------------------------------------------
 		private static CPU instance 		// Singleton instance
 
@@ -53,10 +54,10 @@ class CPU {
 		pc = 0
 
 		// Read the assembly program
-		HardDrive.readFile("Assembly_01")
+		HardDrive.readFile(this, "Assembly_01")
 
 		// Start ui web server
-		WebServer.riseServer()
+		// WebServer.riseServer()
 
 		// Run the program
 		execute()
@@ -157,35 +158,42 @@ class CPU {
 	// HARD LOAD PROGRAM
 	def hardLoad(){
 		def index = 0;
-		memory.get(index).OpCode	= Core.OPCODE.CONF
-		memory.get(index).r1		= 0
-		memory.get(index).r2		= 5
-		memory.get(index).p 		= 0
-		index++
-
-		memory.get(index).OpCode	= Core.OPCODE.CONF
-		memory.get(index).r1		= 10
-		memory.get(index).r2		= 13
-		memory.get(index).p 		= 1
-		index++
-
-		memory.get(index).OpCode	= Core.OPCODE.STX
-		memory.get(index).r1		= 0
-		memory.get(index).r2		= 5
-		memory.get(index).p 		= 0
-		index++
-
-		memory.get(index).OpCode	= Core.OPCODE.CONF
-		memory.get(index).r1		= 17
-		memory.get(index).r2		= 20
-		memory.get(index).p 		= 1
-		index++
 
 		memory.get(index).OpCode	= Core.OPCODE.STOP
 		memory.get(index).r1		= 0
 		memory.get(index).r2		= 0
 		memory.get(index).p 		= 0
 		index++
+	
+		// memory.get(index).OpCode	= Core.OPCODE.CONF
+		// memory.get(index).r1		= 0
+		// memory.get(index).r2		= 5
+		// memory.get(index).p 		= 0
+		// index++
+
+		// memory.get(index).OpCode	= Core.OPCODE.CONF
+		// memory.get(index).r1		= 10
+		// memory.get(index).r2		= 13
+		// memory.get(index).p 		= 1
+		// index++
+
+		// memory.get(index).OpCode	= Core.OPCODE.STX
+		// memory.get(index).r1		= 0
+		// memory.get(index).r2		= 5
+		// memory.get(index).p 		= 0
+		// index++
+
+		// memory.get(index).OpCode	= Core.OPCODE.CONF
+		// memory.get(index).r1		= 17
+		// memory.get(index).r2		= 20
+		// memory.get(index).p 		= 1
+		// index++
+
+		// memory.get(index).OpCode	= Core.OPCODE.STOP
+		// memory.get(index).r1		= 0
+		// memory.get(index).r2		= 0
+		// memory.get(index).p 		= 0
+		// index++
 	
 	}
 }
