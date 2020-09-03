@@ -1,6 +1,7 @@
 package sisop.oliveiracley.processor
 
 import sisop.oliveiracley.io.HardDrive
+import sisop.oliveiracley.ui.WebServer
 import sisop.oliveiracley.ui.ANSI
 
 class CPU {
@@ -27,6 +28,11 @@ class CPU {
 
 	//-Singleton Class Configuration------------
 
+	// Start the VM CPU
+	def static run(){
+		getInstance()
+	}
+
 	// Singleton access
 	def static getInstance(){
 		if(!instance)
@@ -36,7 +42,6 @@ class CPU {
 
 	// Singleton constructor
 	private CPU(){
-		HardDrive.readFile("Assembly_01")
 		interrupt = Interrupts.NoInterrupt
 		
 		memory = Memory.getInstance()
@@ -44,8 +49,17 @@ class CPU {
 		base = 0;
 
 		registers = new int[8]
-		core_1 = new Core(this)
+		core_1 = new Core(this, memory)
 		pc = 0
+
+		// Read the assembly program
+		HardDrive.readFile("Assembly_01")
+
+		// Start ui web server
+		WebServer.riseServer()
+
+		// Run the program
+		execute()
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -93,7 +107,7 @@ class CPU {
 	}
 
 	def registerDump(){
-		println "\n\t      ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}"
+		println "\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}"
 		registers.eachWithIndex{ reg, i ->
 			print "[R${i}] = ${reg}\t"
 			if(i == 2 || i == 5)
@@ -110,9 +124,8 @@ class CPU {
 		return true
 	}
 	// ---------------------------------------------
-	
-	def run(){
 
+	def execute(){
 		hardLoad()
 		
 		while(interrupt == Interrupts.NoInterrupt) {
@@ -160,6 +173,12 @@ class CPU {
 		memory.get(index).r1		= 0
 		memory.get(index).r2		= 5
 		memory.get(index).p 		= 0
+		index++
+
+		memory.get(index).OpCode	= Core.OPCODE.CONF
+		memory.get(index).r1		= 17
+		memory.get(index).r2		= 20
+		memory.get(index).p 		= 1
 		index++
 
 		memory.get(index).OpCode	= Core.OPCODE.STOP

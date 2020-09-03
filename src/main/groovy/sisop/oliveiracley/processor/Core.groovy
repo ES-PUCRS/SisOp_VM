@@ -40,8 +40,8 @@ class Core {
 	private static Memory 	memory
 	private static CPU 		cpu
 
-	public Core (CPU _cpu){
-		memory 	= Memory.getInstance()
+	public Core (CPU _cpu, Memory _memory){
+		memory 	= _memory
 		cpu 	= _cpu
 	}
 
