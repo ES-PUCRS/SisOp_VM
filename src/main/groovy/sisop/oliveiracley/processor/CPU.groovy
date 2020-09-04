@@ -20,7 +20,7 @@ class CPU {
 		private int 		base 			// Memory base access	(not use yet)
 		private int 		limit 			// Memory limit access	(not use yet)
 		private int 		pc 				// Program Counter
-		private Core 		core_1			// CPU Core 1
+		private Core[] 		cores			// CPU Core 1
 
 		private boolean 	registersOutput	// Enable registers output
 		private Range[]		memoryOutput	// Configuration to output memory dump
@@ -49,8 +49,8 @@ class CPU {
 		limit = Memory.memorySize - 1
 		base = 0;
 
+		cores = new Core(this, memory) as Core[]
 		registers = new int[8]
-		core_1 = new Core(this, memory)
 		pc = 0
 
 		// Read the assembly program
@@ -66,6 +66,13 @@ class CPU {
 	//-CPU Instance Variables Access---------------------
 
 	def increment(){ pc++ }
+
+	def getCores(int core){
+		if((core < 0) || (core > (core.size() - 1)))
+			interrupt = Interrupts.InvalidAddress
+		else
+			return cores[core];
+	}
 
 	def getRegister(int rs){
 		if((rs < 0) || (rs > 7))
@@ -138,7 +145,7 @@ class CPU {
 				ir = memory.get(pc)
 
 				// @DECORE -> @EXECUTE
-				core_1."${ir.OpCode}"(ir)
+				cores[0]."${ir.OpCode}"(ir)
 	
 			}
 			// @REPEAT

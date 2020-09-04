@@ -7,8 +7,6 @@ import sisop.oliveiracley.processor.CPU
 import sisop.oliveiracley.ui.ANSI
 import sisop.oliveiracley.VM
 
-// import java.util.regex.*
-
 class HardDrive {
 
 
@@ -32,7 +30,7 @@ class HardDrive {
 		String assembly = file?.text as String
 		String[] code = assembly.split('\n')
 		Word[] temp = new Word[code.size()]
-
+		
 		code.eachWithIndex{ word, i ->
 		// -Formating String-------------------------
 			word =  word.replaceAll("^\\d+\\s+|^\\d+\\t+","")
@@ -45,25 +43,39 @@ class HardDrive {
 							.replaceAll(" ","")
 
 			word = word.split(",")
-		// ------------------------------------------
-			try{
-				temp[i] = translator(word)
-			} catch(Exception e){
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+			word.eachWithIndex{ param, p -> 
+				if(param.toUpperCase().contains("R")){
+					println "CONTAINS"
+					word[p] = word[p].replaceFirst("R|r","")
+					word[p] = (word[p] as int) - 1
+				}
 			}
+			println word
+		// ------------------------------------------
+			// try{
+			// 	println temp[i]
+			// } catch (Exception e){
+			// 	cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+			// }
 		}
-		//memory.loadProgram(temp)
+		
+		// memory.loadProgram(temp)
 	}
 
 
-	translator(def word){
-		def opcode, r1, r2, p
+	def static translator(def word) throws MissingPropertyException, NoSuchFieldException{
+		Core.OPCODE opcode
+		int r1, r2, p
+		r1 = r2 = p = 0
 
-		try{
-			opcode = Core.OPCODE."${word[0]}"
-			
-		}catch(Exception e){
+		opcode = Core.OPCODE."${word[0]}"
+		if(opcode.value.size() != word.size()-1)
+			throw new NoSuchFieldException()
 
+		opcode.value.eachWithIndex{ value, i ->
+			if 		(value == 1)	r1 = word[i + 1] as int
+			else if (value == 2)	r2 = word[i + 1] as int
+			else if (value == 3)	p  = word[i + 1] as int
 		}
 
 		return new Word(opcode, r1, r2, p)
