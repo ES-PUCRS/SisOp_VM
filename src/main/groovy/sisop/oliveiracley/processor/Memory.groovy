@@ -26,6 +26,16 @@ class Memory {
 		return memory[address]
 	}
 
+
+
+	def loadProgram(Word[] context){
+		context.eachWithIndex{ word, i ->
+			memory[i] = word
+		}
+	}
+
+
+
 	def dump(){
 		memory.each{ word ->
 			println word

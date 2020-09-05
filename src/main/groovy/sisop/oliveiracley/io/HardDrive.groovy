@@ -32,7 +32,7 @@ class HardDrive {
 		Word[] temp = new Word[code.size()]
 		
 		code.eachWithIndex{ word, i ->
-		// -Formating String-------------------------
+		// -Formating word string---------------------------------------
 			word =  word.replaceAll("^\\d+\\s+|^\\d+\\t+","")
 						.replaceAll("//.*","")
 			if(word.contains("\t"))
@@ -45,21 +45,22 @@ class HardDrive {
 			word = word.split(",")
 			word.eachWithIndex{ param, p -> 
 				if(param.toUpperCase().contains("R")){
-					println "CONTAINS"
 					word[p] = word[p].replaceFirst("R|r","")
 					word[p] = (word[p] as int) - 1
+				} else if (param.contains("[")){
+					word[p] = word[p].replaceAll("\\[|\\]","")
 				}
 			}
-			println word
-		// ------------------------------------------
-			// try{
-			// 	println temp[i]
-			// } catch (Exception e){
-			// 	cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-			// }
+		// -Translate the word to memory--------------------------------
+			try{
+				temp[i] = translator(word)
+			} catch (Exception e){
+				println "*** Invalided on LOAD ${i}, ${word}"
+				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+			}
 		}
-		
-		// memory.loadProgram(temp)
+	
+		cpu.getMemory().loadProgram(temp)
 	}
 
 
@@ -69,7 +70,8 @@ class HardDrive {
 		r1 = r2 = p = 0
 
 		opcode = Core.OPCODE."${word[0]}"
-		if(opcode.value.size() != word.size()-1)
+		if( opcode.value.size() != word.size()-1 &&
+			opcode != Core.OPCODE.STOP )
 			throw new NoSuchFieldException()
 
 		opcode.value.eachWithIndex{ value, i ->

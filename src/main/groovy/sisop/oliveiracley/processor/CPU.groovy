@@ -54,7 +54,7 @@ class CPU {
 		pc = 0
 
 		// Read the assembly program
-		HardDrive.readFile(this, "Assembly_01")
+		HardDrive.readFile(this, "Assembly_sample")
 
 		// Start ui web server
 		// WebServer.riseServer()
@@ -73,6 +73,8 @@ class CPU {
 		else
 			return cores[core];
 	}
+
+	def getMemory(){ memory	}
 
 	def getRegister(int rs){
 		if((rs < 0) || (rs > 7))
@@ -134,16 +136,15 @@ class CPU {
 	// ---------------------------------------------
 
 	def execute(){
-		hardLoad()
 		
 		while(interrupt == Interrupts.NoInterrupt) {
-			
+			setOutputConfiguration(true, [0..16, 50..65] as Range[])
 			// SHIELD
 			if(legal(pc)){
 				
 				// @FETCH	
 				ir = memory.get(pc)
-
+				println "${pc} => ${ir}"
 				// @DECORE -> @EXECUTE
 				cores[0]."${ir.OpCode}"(ir)
 	
@@ -159,48 +160,5 @@ class CPU {
 			if(memoryOutput)
 				memory.dump(memoryOutput)
 		}
-	}
-
-
-	// HARD LOAD PROGRAM
-	def hardLoad(){
-		def index = 0;
-
-		memory.get(index).OpCode	= Core.OPCODE.STOP
-		memory.get(index).r1		= 0
-		memory.get(index).r2		= 0
-		memory.get(index).p 		= 0
-		index++
-	
-		// memory.get(index).OpCode	= Core.OPCODE.CONF
-		// memory.get(index).r1		= 0
-		// memory.get(index).r2		= 5
-		// memory.get(index).p 		= 0
-		// index++
-
-		// memory.get(index).OpCode	= Core.OPCODE.CONF
-		// memory.get(index).r1		= 10
-		// memory.get(index).r2		= 13
-		// memory.get(index).p 		= 1
-		// index++
-
-		// memory.get(index).OpCode	= Core.OPCODE.STX
-		// memory.get(index).r1		= 0
-		// memory.get(index).r2		= 5
-		// memory.get(index).p 		= 0
-		// index++
-
-		// memory.get(index).OpCode	= Core.OPCODE.CONF
-		// memory.get(index).r1		= 17
-		// memory.get(index).r2		= 20
-		// memory.get(index).p 		= 1
-		// index++
-
-		// memory.get(index).OpCode	= Core.OPCODE.STOP
-		// memory.get(index).r1		= 0
-		// memory.get(index).r2		= 0
-		// memory.get(index).p 		= 0
-		// index++
-	
 	}
 }

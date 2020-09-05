@@ -192,7 +192,7 @@ class Core {
 	// R1 := Rs
 	// [A] ← Rs
 	def STD (def word){
-	    memory.get(word.p).OpCode = OpCode.DATA;
+	    memory.get(word.p).OpCode = Core.OPCODE.DATA;
 	    memory.get(word.p).p = cpu.getRegister(word.r1)
 	    cpu.increment()
 	}
