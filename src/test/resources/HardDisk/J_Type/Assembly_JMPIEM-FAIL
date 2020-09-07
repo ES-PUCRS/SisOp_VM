@@ -1,0 +1,5 @@
+LDI		R1, 12
+STD		[7], R1
+LDI		R2, 1
+JMPIEM	[7], R2
+STOP

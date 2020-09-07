@@ -1,0 +1,6 @@
+LDI		R1, 5
+LDI		R2, 1
+JMPIG	R1, R2
+___ 
+___ 
+STOP

@@ -1,0 +1,3 @@
+LDI		R2, 20
+SUBI	R2, 6
+STOP

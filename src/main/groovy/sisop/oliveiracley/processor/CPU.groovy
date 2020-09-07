@@ -35,7 +35,7 @@ class CPU {
 	}
 
 	// Singleton access
-	def static getInstance(){
+	def static getInstance() {
 		if(!instance)
 			instance = new CPU()
 		return instance
@@ -47,20 +47,14 @@ class CPU {
 		
 		memory = Memory.getInstance()
 		limit = Memory.memorySize - 1
-		base = 0;
+		base = 0
 
 		cores = new Core(this, memory) as Core[]
 		registers = new int[8]
-		pc = 0
-
-		// Read the assembly program
-		HardDrive.readFile(this, "Assembly_sample")
+		pc = base
 
 		// Start ui web server
 		// WebServer.riseServer()
-
-		// Run the program
-		execute()
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -75,6 +69,8 @@ class CPU {
 	}
 
 	def getMemory(){ memory	}
+
+	def getPC(){ pc }
 
 	def getRegister(int rs){
 		if((rs < 0) || (rs > 7))
@@ -101,6 +97,13 @@ class CPU {
 			pc = _pc
 	}
 
+	// Outside imput--------------------------------------------------------
+
+	def loadProgram(String file) {
+		// Read the assembly program
+		HardDrive.readFile(this, file)
+	}
+
 	// Output --------------------------------------------------------------
 
 	def setOutputConfiguration(
@@ -117,12 +120,14 @@ class CPU {
 	}
 
 	def registerDump(){
-		println "\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}"
+		String output = 
+		"\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}\n"
 		registers.eachWithIndex{ reg, i ->
-			print "[R${i}] = ${reg}\t"
-			if(i == 2 || i == 5)
-				println ""
+			output += "[R${i+1}] = ${reg}\t"
+			if((i + 1) % 3 == 0)
+				output += "\n"
 		}
+		return output
 	}
 
 	// Runtime Auxiliar Methods --------------------
@@ -133,18 +138,30 @@ class CPU {
 		}
 		return true
 	}
+
+	private reset(){
+		interrupt = Interrupts.NoInterrupt
+		
+		limit = Memory.memorySize - 1
+		base = 0;
+
+		registers = new int[8]
+		pc = base
+	}
 	// ---------------------------------------------
 
-	def execute(){
-		
+	def execute(String _program){
+		reset()
+		loadProgram(_program)
+		String output
+
 		while(interrupt == Interrupts.NoInterrupt) {
-			setOutputConfiguration(true, [0..16, 50..65] as Range[])
 			// SHIELD
 			if(legal(pc)){
 				
 				// @FETCH	
 				ir = memory.get(pc)
-				println "${pc} => ${ir}"
+				// println ir
 				// @DECORE -> @EXECUTE
 				cores[0]."${ir.OpCode}"(ir)
 	
@@ -152,13 +169,19 @@ class CPU {
 			// @REPEAT
 		}
 
-		if(interrupt != Interrupts.STOP)
-			println("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")		
-		else {
+		// ERR/OUT
+		if(interrupt != Interrupts.STOP){
+			output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
+			println registerDump()
+			println memory.dump([0..18, 50..60] as Range[])		
+		} else {
 			if(registersOutput)
-				registerDump()
+				output  = registerDump()
 			if(memoryOutput)
-				memory.dump(memoryOutput)
+				output += memory.dump(memoryOutput)
 		}
+
+		println output
+		return output
 	}
 }

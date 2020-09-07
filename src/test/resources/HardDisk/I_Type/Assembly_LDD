@@ -1,0 +1,4 @@
+LDI		R6, 8
+STD		[0], R6
+LDD		R6, [0]
+STOP 

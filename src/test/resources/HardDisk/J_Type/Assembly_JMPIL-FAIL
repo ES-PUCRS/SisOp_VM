@@ -1,0 +1,4 @@
+LDI		R1, 5
+LDI		R2, 0
+JMPIL	R1, R2
+STOP

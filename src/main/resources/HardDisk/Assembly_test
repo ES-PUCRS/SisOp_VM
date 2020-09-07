@@ -1,0 +1,4 @@
+LDI		R1, 8
+ADDI	R1, 5
+CONF	0,5,1
+STOP

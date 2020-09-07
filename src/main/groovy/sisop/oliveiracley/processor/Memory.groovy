@@ -35,23 +35,18 @@ class Memory {
 	}
 
 
-
-	def dump(){
-		memory.each{ word ->
-			println word
-		}
-	}
-
 	def dump(Range[] ranges){
-		println "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		String output =
+		"\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
 
 		ranges.eachWithIndex { range, i ->
 		  	memory.getAt(range)
 			      .eachWithIndex{ word, l ->
-					println "[${String.format( "%04d", l + range[0] )}] => " + word.toString()
+					output += "\n[${String.format( "%04d", l + range[0] )}] => " + word.toString()
 				}
 			if(i != ranges.size()-1)
-				println "\t\t     ..."
+				output += "\n\t\t     ..."
 		}
+		return output
 	}
 }

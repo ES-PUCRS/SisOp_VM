@@ -36,7 +36,7 @@ class Core {
 	/* -- */ ___		(  0  ); // 			   |						  |		|		|	| Memory addess is empty	   //
 	//=========================================================================================================================//
 		private final int[] value
-		OPCODE(int[] value) {	this.value = value	}
+		OPCODE(int[] value) { this.value = value }
 	}
 
 	private static Memory 	memory
@@ -59,15 +59,15 @@ class Core {
 	// R1 := Rs
 	// PC ← Rs
 	def JMPI (def word){
-		cpu.setPC(getRegister(word.r1))
+		cpu.setPC(cpu.getRegister(word.r1))
 	}
 	
 	// R1 := Rs
 	// R2 := Rc
 	// Rc > 0 ? PC ← Rs : PC++
 	def JMPIG (def word){
-		if(word.r2 > 0)
-			cpu.setPC(word.r1)
+		if(cpu.getRegister(word.r2) > 0)
+			cpu.setPC(cpu.getRegister(word.r1))
 		else
 			cpu.increment()
 	}
@@ -76,19 +76,18 @@ class Core {
 	// R2 := Rc
 	// Rc < 0 ? PC ← Rs : PC++
 	def JMPIL (def word){
-		if(word.r2 < 0)
-			cpu.setPC(word.r1)
+		if(cpu.getRegister(word.r2) < 0)
+			cpu.setPC(cpu.getRegister(word.r1))
 		else
 			cpu.increment()
-
 	}
 	
 	// R1 := Rs
 	// R2 := Rc
 	// Rc = 0 ? PC ← Rs : PC++
 	def JMPIE (def word){
-		if(word.r2 == 0)
-			cpu.setPC(word.r1)
+		if(cpu.getRegister(word.r2) == 0)
+			cpu.setPC(cpu.getRegister(word.r1))
 		else
 			cpu.increment()
 	}
@@ -96,11 +95,7 @@ class Core {
 	// P := A
 	// PC ← [A]
 	def JMPIM (def word){
-		def mem = memory.get(word.p)
-		if(mem.OpCode == OPCODE.___)
-			cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-		else
-			cpu.setPC(mem.p)
+		cpu.setPC(memory.get(word.r2).p)
 	}
 	
 
@@ -108,12 +103,8 @@ class Core {
 	// R2 := Rc
 	// Rc  > 0 ? PC ← [A] : PC++
 	def JMPIGM (def word){
-		if(word.r2 > 0){
-			def mem = memory.get(word.p)
-			if(mem.OpCode == OPCODE.___)
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-			else
-				cpu.setPC(mem.p)
+		if(cpu.getRegister(word.r2) > 0){
+			cpu.setPC(memory.get(word.p).p)
 		} else {
 	    	cpu.increment()
 		}
@@ -123,12 +114,8 @@ class Core {
 	// R2 := Rc
 	// Rc  < 0 ? PC ← [A] : PC++
 	def JMPILM (def word){
-		if(word.r2 < 0){
-			def mem = memory.get(word.p)
-			if(mem.OpCode == OPCODE.___)
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-			else
-				cpu.setPC(mem.p)
+		if(cpu.getRegister(word.r2) < 0){
+			cpu.setPC(memory.get(word.p).p)
 		} else {
 	    	cpu.increment()
 		}
@@ -138,12 +125,8 @@ class Core {
 	// R2 := Rc
 	// Rc  = 0 ? PC ← [A] : PC++
 	def JMPIEM (def word){
-		if(word.r2 == 0){
-			def mem = memory.get(word.p)
-			if(mem.OpCode == OPCODE.___)
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-			else
-				cpu.setPC(mem.p)
+		if(cpu.getRegister(word.r2) == 0){
+			cpu.setPC(memory.get(word.p).p)
 		} else {
 	    	cpu.increment()
 		}
@@ -156,7 +139,8 @@ class Core {
 	// R1 := rd
 	// Rd ← Rd + k
 	def ADDI (def word){
-		cpu.setRegister(word.r1, (word.r1 - word.p))
+		cpu.setRegister(word.r1,
+			(cpu.getRegister(word.r1) + word.p))
 	    cpu.increment()
 	}
 	
@@ -164,7 +148,8 @@ class Core {
 	// R1 := rd
 	// Rd ← Rd - k
 	def SUBI (def word){
-		cpu.setRegister(word.r1, (word.r1 - word.p))
+		cpu.setRegister(word.r1,
+			(cpu.getRegister(word.r1) - word.p))
 	    cpu.increment()
 	}
 	
@@ -204,7 +189,8 @@ class Core {
 	// R2 := Rs
 	// Rd ← Rd + Rs
 	def ADD (def word){
-		cpu.setRegister(word.r1, (word.r1 + word.r2))
+		cpu.setRegister(word.r1,
+			(cpu.getRegister(word.r1) + cpu.getRegister(word.r2)))
 	    cpu.increment()
 	}
 	
@@ -212,7 +198,8 @@ class Core {
 	// R2 := Rs
 	// Rd ← Rd - Rs
 	def SUB (def word){
-		cpu.setRegister(word.r1, (word.r1 - word.r2))
+		cpu.setRegister(word.r1,
+			(cpu.getRegister(word.r1) - cpu.getRegister(word.r2)))
 	    cpu.increment()
 	}
 	
@@ -220,7 +207,8 @@ class Core {
 	// R2 := Rs
 	// Rd ← Rd * Rs
 	def MULT (def word){
-		cpu.setRegister(word.r1, (word.r1 * word.r2))
+		cpu.setRegister(word.r1,
+			(cpu.getRegister(word.r1) * cpu.getRegister(word.r2)))
 	    cpu.increment()
 	}
 	
@@ -228,11 +216,7 @@ class Core {
 	// R2 := Rs
 	// Rd ← [Rs]
 	def LDX (def word){
-		def mem = memory.get(word.r2)
-		if(mem.OpCode == OPCODE.___)
-			cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-		else
-			cpu.setRegister(word.r1, mem.p)
+		cpu.setRegister(word.r1, memory.get(word.r2).p)
 	    cpu.increment()
 	}
 	
@@ -240,11 +224,8 @@ class Core {
 	// R2 := Rs
 	// [Rd] ← Rs
 	def STX (def word){
-		def mem = memory.get(word.r1)
-		if(mem.OpCode == OPCODE.___)
-			cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-		else
-			cpu.setRegister(mem.p, word.r2)
+	    memory.get(cpu.getRegister(word.r1)).OpCode = Core.OPCODE.DATA;
+		memory.get(cpu.getRegister(word.r1)).p = cpu.getRegister(word.r2)
 	    cpu.increment()
 	}
 

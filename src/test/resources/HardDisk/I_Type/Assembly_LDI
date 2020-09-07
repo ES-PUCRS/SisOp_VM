@@ -1,0 +1,3 @@
+ADDI	R5, 99
+LDI		R5, 2
+STOP

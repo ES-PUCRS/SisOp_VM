@@ -1,0 +1,8 @@
+LDI		R1, 8
+LDI		R2, 0
+JMPIE	R1, R2
+___ 
+___ 
+___ 
+___ 
+STOP
