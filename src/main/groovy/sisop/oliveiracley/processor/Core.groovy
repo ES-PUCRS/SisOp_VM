@@ -216,7 +216,7 @@ class Core {
 	// R2 := Rs
 	// Rd ← [Rs]
 	def LDX (def word){
-		cpu.setRegister(word.r1, memory.get(word.r2).p)
+		cpu.setRegister(word.r1, memory.get(cpu.getRegister(word.r2)).p)
 	    cpu.increment()
 	}
 	

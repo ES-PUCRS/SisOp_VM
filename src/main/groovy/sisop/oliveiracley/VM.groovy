@@ -5,7 +5,7 @@ import sisop.oliveiracley.processor.CPU;
 class VM {
 
     public static void main(String[] args) {
-         CPU.run().execute("Assembly_test")
+         CPU.run()
     }
 
 }

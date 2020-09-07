@@ -1,0 +1,4 @@
+LDI		R1, 5
+LDI		R2, 10
+STX		R1, R2
+STOP

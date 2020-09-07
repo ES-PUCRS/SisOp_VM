@@ -1,4 +1,4 @@
-package sisop.oliveiracley
+package sisop.oliveiracley.processor
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.DisplayName;

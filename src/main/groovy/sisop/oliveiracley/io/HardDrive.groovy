@@ -69,7 +69,7 @@ class HardDrive {
 		int r1, r2, p
 		r1 = r2 = p = 0
 
-		opcode = Core.OPCODE."${word[0]}"
+		opcode = Core.OPCODE."${word[0].toUpperCase()}"
 		if( opcode.value.size() != word.size()-1 &&
 			opcode != Core.OPCODE.STOP )
 			throw new NoSuchFieldException()

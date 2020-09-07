@@ -161,7 +161,7 @@ class CPU {
 				
 				// @FETCH	
 				ir = memory.get(pc)
-				// println ir
+				
 				// @DECORE -> @EXECUTE
 				cores[0]."${ir.OpCode}"(ir)
 	
@@ -180,8 +180,9 @@ class CPU {
 			if(memoryOutput)
 				output += memory.dump(memoryOutput)
 		}
-
-		println output
+	
+		if(output)
+			println output
 		return output
 	}
 }
