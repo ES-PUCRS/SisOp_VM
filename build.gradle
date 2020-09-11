@@ -31,7 +31,7 @@ dependencies {
     // implementation 'org.codehaus.groovy:groovy:3.0.0-rc-2'
 
     // Beans
-    implementation 'javax.enterprise:cdi-api:2.0.SP1'
+    // implementation 'javax.enterprise:cdi-api:2.0.SP1'
     // compile 'groovyx.gdi:gdi:0.1a-SNAPSHOT'
 
 	// <TESTS> JUnit 5 
@@ -72,12 +72,13 @@ test {
 
 task artifact(type: Zip){
     
-    include '*'
-    include '*/**'
     exclude 'RELAESE_Artifact.zip'
-    exclude '/.gradle'
+    exclude '/.*'
     exclude 'gradle'
     exclude '/build/**'
+    
+    include '*'
+    include '*/**'
     into "SisOp_VM"
 
     archiveFileName = 'RELAESE_Artifact.zip'
