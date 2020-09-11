@@ -1,16 +1,24 @@
 package sisop.oliveiracley.processor
 
+import groovy.transform.ThreadInterrupt
+import groovy.lang.Lazy
+
 import sisop.oliveiracley.io.HardDrive
 import sisop.oliveiracley.ui.WebServer
 import sisop.oliveiracley.ui.ANSI
+import sisop.oliveiracley.VM
 
+@ThreadInterrupt
 class CPU {
 
+    @Lazy
+	Properties properties
+
 	enum Interrupts {
-		NoInterrupt, InvalidAddress, InvalidInstruction, STOP;
+		NoInterrupt, InvalidAddress, InvalidInstruction, InvalidProgram, STOP;
 	}
 
-	//Instance variables ------------------------------------------------------------
+	// Instance variables -----------------------------------------------------------
 		private static CPU instance 		// Singleton instance
 
 		private def Word 	ir 				// Instruction register
@@ -30,8 +38,12 @@ class CPU {
 	//-Singleton Class Configuration------------
 
 	// Start the VM CPU
-	def static run(){
-		getInstance()
+	def static run(String[] args){
+		def _instance = getInstance()
+		args.each{ arg -> 
+			_instance.loadProgramToMemory(arg as String)
+			_instance.execute(arg as String)
+		}
 	}
 
 	// Singleton access
@@ -42,15 +54,27 @@ class CPU {
 	}
 
 	// Singleton constructor
+
 	private CPU(){
+	    this
+	    .getClass()
+    	.getResource( VM.properties )
+    	.withInputStream {
+        	properties.load(it)
+    	}
+
 		interrupt = Interrupts.NoInterrupt
 		
+		registers = new int[ properties."cpu.registers" as int ]
+		cores = new Core[properties."cpu.registers" as int]
 		memory = Memory.getInstance()
-		limit = Memory.memorySize - 1
-		base = 0
-
-		cores = new Core(this, memory) as Core[]
-		registers = new int[8]
+		
+		cores.eachWithIndex { core, i -> 
+			cores[i] = new Core(this, memory)
+		}
+		
+		// limit = (properties."memory.size" as int) - 1
+		// base = 0
 		pc = base
 
 		// Start ui web server
@@ -91,7 +115,7 @@ class CPU {
 	}
 
 	def setPC(int _pc){
-		if((_pc < 0) || (_pc > (Memory.memorySize - 1)))
+		if((_pc < 0) || (_pc > ((properties."memory.size" as int) - 1)))
 			interrupt = Interrupts.InvalidAddress
 		else
 			pc = _pc
@@ -99,9 +123,23 @@ class CPU {
 
 	// Outside imput--------------------------------------------------------
 
-	def loadProgram(String file) {
+	def loadProgramToMemory(String _program) {
 		// Read the assembly program
-		HardDrive.readFile(this, file)
+		memory.loadProgram(
+			_program,
+			HardDrive.readFile(this, _program)
+		)
+	}
+
+	def loadProgram(String _program){
+		def programBounds = memory.grep(_program)
+		
+		if(programBounds){
+			base 	= programBounds[0]
+			limit 	= programBounds[1]
+		} else {
+			interrupt = Interrupts.InvalidProgram
+		}
 	}
 
 	// Output --------------------------------------------------------------
@@ -123,7 +161,7 @@ class CPU {
 		String output = 
 		"\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}\n"
 		registers.eachWithIndex{ reg, i ->
-			output += "[R${i+1}] = ${reg}\t"
+			output += "[R${i}] = ${reg}\t"
 			if((i + 1) % 3 == 0)
 				output += "\n"
 		}
@@ -142,7 +180,7 @@ class CPU {
 	private reset(){
 		interrupt = Interrupts.NoInterrupt
 		
-		limit = Memory.memorySize - 1
+		limit = (properties."memory.size" as int) - 1
 		base = 0;
 
 		registers = new int[8]
@@ -172,8 +210,8 @@ class CPU {
 		// ERR/OUT
 		if(interrupt != Interrupts.STOP){
 			output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
-			println registerDump()
-			println memory.dump([0..18, 50..60] as Range[])		
+			// println registerDump()
+			// println memory.dump([base..limit] as Range[])
 		} else {
 			if(registersOutput)
 				output  = registerDump()

@@ -1,11 +1,18 @@
 package sisop.oliveiracley.ui
 
 import com.sun.net.httpserver.HttpServer
+import groovy.lang.Lazy
+
+import sisop.oliveiracley.VM
 
 class WebServer {
 
+	@Lazy
+	private static Properties properties
+
 	def static riseServer(){
-		int PORT = 8080
+		importProperties()
+		int PORT = (properties."server.port" as int)
 		HttpServer.create(new InetSocketAddress(PORT), /*max backlog*/ 0).with {
 		    println "Server is listening on ${PORT}, hit Ctrl+C to exit."    
 		    createContext("/") { http ->
@@ -18,5 +25,14 @@ class WebServer {
 		    }
 		    start()
 		}
+	}
+
+	def static importProperties(){
+		new Object() {}
+	    	.getClass()
+	    	.getResource( VM.properties )
+	    	.withInputStream {
+	        	properties.load(it)
+	    	}
 	}
 }

@@ -27,6 +27,7 @@ class CPUOpcodeITest {
 	@Test
 	@DisplayName("ADDI (Rd <- Rd + k)")
     void ADDI() {
+		cpu.loadProgramToMemory("I_Type/Assembly_ADDI")
  		cpu.execute("I_Type/Assembly_ADDI")
         assertEquals(25,cpu.getRegister(0));
     }
@@ -34,6 +35,7 @@ class CPUOpcodeITest {
 	@Test
 	@DisplayName("SUBI (Rd <- Rd - k)")
     void SUBI() {
+		cpu.loadProgramToMemory("I_Type/Assembly_SUBI")
  		cpu.execute("I_Type/Assembly_SUBI")
         assertEquals(14,cpu.getRegister(1));
     }
@@ -41,6 +43,7 @@ class CPUOpcodeITest {
 	@Test
 	@DisplayName("LDI (Rd <- k)")
     void LDI() {
+		cpu.loadProgramToMemory("I_Type/Assembly_LDI")
  		cpu.execute("I_Type/Assembly_LDI")
         assertEquals(2,cpu.getRegister(4));
     }
@@ -48,6 +51,7 @@ class CPUOpcodeITest {
 	@Test
 	@DisplayName("LDD (Rd <- [A])")
     void LDD() {
+		cpu.loadProgramToMemory("I_Type/Assembly_LDD")
  		cpu.execute("I_Type/Assembly_LDD")
         assertEquals(8,cpu.getRegister(5));
     }
@@ -55,6 +59,7 @@ class CPUOpcodeITest {
 	@Test
 	@DisplayName("STD ([A] <- Rs)")
     void STD() {
+		cpu.loadProgramToMemory("I_Type/Assembly_STD")
  		cpu.execute("I_Type/Assembly_STD")
         Memory memory = cpu.getMemory()
 

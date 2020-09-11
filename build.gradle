@@ -14,6 +14,9 @@ application {
     mainClassName = 'sisop.oliveiracley.VM'
 }
 
+run {
+    systemProperties = System.properties
+}
 
 repositories {
     // Manage packages from Maven Central repository
@@ -26,6 +29,10 @@ dependencies {
     // <LANGUAGE> Groovy
     implementation 'org.codehaus.groovy:groovy:3.0.5'
     // implementation 'org.codehaus.groovy:groovy:3.0.0-rc-2'
+
+    // Beans
+    implementation 'javax.enterprise:cdi-api:2.0.SP1'
+    // compile 'groovyx.gdi:gdi:0.1a-SNAPSHOT'
 
 	// <TESTS> JUnit 5 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
@@ -61,7 +68,6 @@ test {
     }
 }
 
-
 //  TASKS ------------------
 
 task artifact(type: Zip){
@@ -70,6 +76,7 @@ task artifact(type: Zip){
     include '*/**'
     exclude 'RELAESE_Artifact.zip'
     exclude '/.gradle'
+    exclude 'gradle'
     exclude '/build/**'
     into "SisOp_VM"
 

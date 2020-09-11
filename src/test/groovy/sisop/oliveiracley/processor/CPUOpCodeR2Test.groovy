@@ -27,35 +27,40 @@ class CPUOpcodeR2Test {
 	@Test
 	@DisplayName("ADD (Rd <- Rd + Rs)")
     void ADD() {
- 		cpu.execute("R2_Type/Assembly_ADD")
+          cpu.loadProgramToMemory("R2_Type/Assembly_ADD")
+          cpu.execute("R2_Type/Assembly_ADD")
         assertEquals(11,cpu.getRegister(2));
     }
 
 	@Test
 	@DisplayName("SUB (Rd <- Rd - Rs)")
     void SUB() {
- 		cpu.execute("R2_Type/Assembly_SUB")
+          cpu.loadProgramToMemory("R2_Type/Assembly_SUB")
+          cpu.execute("R2_Type/Assembly_SUB")
         assertEquals(-1,cpu.getRegister(2));
     }
 
 	@Test
 	@DisplayName("MULT (Rd <- Rd * Rs)")
     void MULT() {
- 		cpu.execute("R2_Type/Assembly_MULT")
+          cpu.loadProgramToMemory("R2_Type/Assembly_MULT")
+          cpu.execute("R2_Type/Assembly_MULT")
         assertEquals(12,cpu.getRegister(2));
     }
 
 	@Test
 	@DisplayName("LDX (Rd <- [Rs])")
     void LDX() {
- 		cpu.execute("R2_Type/Assembly_LDX")
+          cpu.loadProgramToMemory("R2_Type/Assembly_LDX")
+          cpu.execute("R2_Type/Assembly_LDX")
         assertEquals(9,cpu.getRegister(4));
     }
 
 	@Test
 	@DisplayName("STX ([Rd] <- Rs)")
     void STX() {
- 		cpu.execute("R2_Type/Assembly_STX")
+          cpu.loadProgramToMemory("R2_Type/Assembly_STX")
+          cpu.execute("R2_Type/Assembly_STX")
         Memory memory = cpu.getMemory()
 
         assertEquals(10, memory.get(5).p);

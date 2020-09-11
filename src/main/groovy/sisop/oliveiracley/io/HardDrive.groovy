@@ -44,12 +44,12 @@ class HardDrive {
 
 			word = word.split(",")
 			word.eachWithIndex{ param, p -> 
-				if(param.toUpperCase().contains("R")){
+				if(param.toUpperCase().contains("R"))
 					word[p] = word[p].replaceFirst("R|r","")
-					word[p] = (word[p] as int) - 1
-				} else if (param.contains("[")){
+					// This line does exist if the register is on 1..8
+					// word[p] = (word[p] as int) - 1 
+				else if (param.contains("["))
 					word[p] = word[p].replaceAll("\\[|\\]","")
-				}
 			}
 		// -Translate the word to memory--------------------------------
 			try{
@@ -60,7 +60,7 @@ class HardDrive {
 			}
 		}
 	
-		cpu.getMemory().loadProgram(temp)
+		return temp
 	}
 
 
