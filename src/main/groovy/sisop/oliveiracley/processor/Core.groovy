@@ -43,6 +43,7 @@ class Core {
 	private static CPU 		cpu
 	private static int 		base
 	private static int 		limit
+	private static String	program
 
 	public Core (CPU _cpu, Memory _memory){
 		memory 	= _memory
@@ -98,7 +99,7 @@ class Core {
 	// PC ← [A]
 	def JMPIM (def word){
 		if(legal(word.p))
-			cpu.setPC(memory.get(word.r2).p)
+			cpu.setPC(memory.get(program, word.r2).p)
 	}
 	
 
@@ -108,7 +109,7 @@ class Core {
 	def JMPIGM (def word){
 		if(legal(word.p)){
 			if(cpu.getRegister(word.r2) > 0){
-				cpu.setPC(memory.get(word.p).p)
+				cpu.setPC(memory.get(program, word.p).p)
 			} else {
 		    	cpu.increment()
 			}
@@ -121,7 +122,7 @@ class Core {
 	def JMPILM (def word){
 		if(legal(word.p)){
 			if(cpu.getRegister(word.r2) < 0){
-				cpu.setPC(memory.get(word.p).p)
+				cpu.setPC(memory.get(program, word.p).p)
 			} else {
 		    	cpu.increment()
 			}
@@ -134,7 +135,7 @@ class Core {
 	def JMPIEM (def word){
 		if(legal(word.p)){
 			if(cpu.getRegister(word.r2) == 0){
-				cpu.setPC(memory.get(word.p).p)
+				cpu.setPC(memory.get(program, word.p).p)
 			} else {
 		    	cpu.increment()
 			}
@@ -175,7 +176,7 @@ class Core {
 	// Rd ← [A]
 	def LDD (def word){
 		if(legal(word.p)){
-			def mem = memory.get(word.p)
+			def mem = memory.get(program, word.p)
 			if(mem.OpCode == OPCODE.___){
 				if(CPU.debug)
 					println "InvalidInstruction on Core.OPCODE.LDD"
@@ -191,8 +192,8 @@ class Core {
 	// [A] ← Rs
 	def STD (def word){
 		if(legal(word.p)){
-		    memory.get(word.p).OpCode = Core.OPCODE.DATA;
-		    memory.get(word.p).p = cpu.getRegister(word.r1)
+		    memory.get(program, word.p).OpCode = Core.OPCODE.DATA;
+		    memory.get(program, word.p).p = cpu.getRegister(word.r1)
 		    cpu.increment()
 		}
 	}
@@ -232,7 +233,7 @@ class Core {
 	// Rd ← [Rs]
 	def LDX (def word){
 		if(legal(cpu.getRegister(word.r2))){
-			cpu.setRegister(word.r1, memory.get(cpu.getRegister(word.r2)).p)
+			cpu.setRegister(word.r1, memory.get(program, cpu.getRegister(word.r2)).p)
 		    cpu.increment()
 		}
 	}
@@ -242,8 +243,8 @@ class Core {
 	// [Rd] ← Rs
 	def STX (def word){
 		if(legal(cpu.getRegister(word.r1))){
-		    memory.get(cpu.getRegister(word.r1)).OpCode = Core.OPCODE.DATA;
-			memory.get(cpu.getRegister(word.r1)).p = cpu.getRegister(word.r2)
+		    memory.get(program, cpu.getRegister(word.r1)).OpCode = Core.OPCODE.DATA;
+			memory.get(program, cpu.getRegister(word.r1)).p = cpu.getRegister(word.r2)
 		    cpu.increment()
 		}
 	}
@@ -307,5 +308,6 @@ class Core {
 	public set(def bounds){
 		base  = bounds.base
 		limit = bounds.limit
+		program = bounds.program
 	}
 }

@@ -4,7 +4,7 @@
 3 STD [19], R2
 4 LDI R7, 20 // proximo endereco a armazenar proximo numero
 5 LDI R5, 6 // 6 é proxima posição de mem (para pular para ela depois)
-6 LDI R6, 28 // final
+6 LDI R6, 29 // final
 7 LDI R3, 0
 8 ADD R3, R1 // R3 =+R1
 9 LDI R1,0

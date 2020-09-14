@@ -18,6 +18,8 @@ class CPU {
 		NoInterrupt, InvalidAddress, InvalidInstruction, InvalidProgram, STOP;
 	}
 
+		public static final boolean debug = false
+		// public static final boolean debug = true
 	// Instance variables -----------------------------------------------------------
 		private static CPU instance 		// Singleton instance
 
@@ -33,7 +35,6 @@ class CPU {
 		private boolean 	registersOutput	// Enable registers output
 		private Range[]		memoryOutput	// Configuration to output memory dump
 	//--------------------------------------------------------------------------------
-		public final boolean debug = false
 
 	//-Singleton Class Configuration------------
 
@@ -73,10 +74,8 @@ class CPU {
 			cores[i] = new Core(this, memory)
 		}
 		
-		// limit = (properties."memory.size" as int) - 1
-		// base = 0
 		pc = base = limit = -1
-		// println memory.dumpPages(0..1)
+
 		// Start ui web server
 		// WebServer.riseServer()
 	}
@@ -182,10 +181,11 @@ class CPU {
 		return true
 	}
 
-	private reset(){
+	private reset(String program){
 		interrupt = Interrupts.NoInterrupt
 		
-		memory.free((base..limit) as Range)
+		if(base >= 0 && limit <= (properties."memory.size" as int) - 1)
+			memory.free(program)
 
 		limit = (properties."memory.size" as int) - 1
 		base = 0;
@@ -194,21 +194,21 @@ class CPU {
 		pc = base
 	}
 
-	private setCores(){
+	private setCores(String _program){
 		cores.each{
-			it.set(base: base, limit: limit)
+			it.set(base: base, limit: limit, program: _program)
 		}
 	}
 
-	private prepare(def instructions){
-		reset()
-		loadProgram(instructions.program)
-		setCores()
+	private prepare(String program){
+		reset(program)
+		loadProgram(program)
+		setCores(program)
 	}
 	// ---------------------------------------------
 
 	def execute(String _program){
-		prepare(program: _program)
+		prepare(_program)
 		String output
 
 		while(interrupt == Interrupts.NoInterrupt) {
@@ -216,7 +216,7 @@ class CPU {
 			if(legal(pc)){
 				
 				// @FETCH	
-				ir = memory.get(pc)
+				ir = memory.get(_program, pc)
 				// @DECORE -> @EXECUTE
 				cores[0]."${ir.OpCode}"(ir)
 	

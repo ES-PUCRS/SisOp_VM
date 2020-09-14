@@ -13,7 +13,7 @@ class Memory {
 	// Instance variables ------------------------
 		private static Memory 	instance
 		private Word[] 			memory
-		private Map				workbook
+		private Map				virtual_memory
 		private Map				pager
 
 		private final int		frames
@@ -42,7 +42,8 @@ class Memory {
 			memory[i] = new Word(Core.OPCODE.___, 0, 0, 0)
 		}
 
-		workbook = pager = [:]
+		virtual_memory = [:]
+		pager = [:]
 		
 		// Grab pages configuration
 		pages = ((properties."memory.size" as int) / (properties."memory.frames" as int)) -1
@@ -60,13 +61,17 @@ class Memory {
 	}
 
 	// Memory access ------------
-	def get(int address){
-		return memory[address]
+	def get(String program, int address){
+		return memory[virtual_memory[program][address]]
 	}
 
 	// Memory output -----------------------------------------------------------
-	def dump(String _program){
-		return dump(([workbook[_program][0]..workbook[_program][1]] as Range[]))
+	def dump(String program){
+		if(virtual_memory.containsKey(program)){
+			def begin 	= virtual_memory[program].take(1)[0]
+			def end 	= (virtual_memory[program].size() - 1)
+			return dump([begin..end] as Range[])
+		}
 	}
 	def dump(Range[] ranges){
 		String output =
@@ -100,45 +105,54 @@ class Memory {
 	// Memory Manager -------------------------------------
 	// Subscribe memory with the program and allocate memory on pager
 	def loadProgram(String program, Word[] context){
-		def bounds = malloc(context.size())
-		workbook[program] = [ bounds[0], bounds[1] ]
+		def addresses = malloc(program, context.size())
+
 		context.eachWithIndex{ word, i ->
-			memory[i] = word
+			memory[addresses[i]] = word
 		}
 	}
 
 	// Write where the memory is been used on pager
-	def malloc(int size){
-		// Range range
-		// def sheet
-		// def begin
-		// pager.each{ page -> 
-		// 	sheet = page.findAll { key, value -> value == false }
-		// 	if (sheet != [:]){
-		// 		begin = sheet.take(1).key
-		// 		range = (begin..begin)
-		// 		(begin..(begin + size)).each{
-		// 			if(pager[((it/frames) as int)][it])
-		// 		}
-		// 	}
-		// }
+	private malloc(String program, int size){
+		def frame
+		def sheet = [:]
+		int i = 0
 
-		// Starts to be shiet code.
-		// Stop 5 A.m.
+		pager.each{ pageIndex, frameMap ->
+			frame = frameMap.findAll { key, value -> value == false }
+			if(i >= size) return true
+			if (frame != [:]){
+				frame.each{
+					if(i < size){
+						pager[(it.key/frames) as int][it.key] = true
+						sheet[i] = it.key
+						i++
+					}
+				}
+			}
+		}
 
-		return [0, size-1] as int []
+		return virtual_memory[program] = sheet
 	}
 
 	// Unsubscrime memory and note memory pager
-	def free(Range range){
-		range.each{
-			memory[it] = new Word(Core.OPCODE.___, 0, 0, 0)
-			pager[((it/frames) as int)][it] = false
+	def free(String program){
+		if(virtual_memory.containsKey(program)){
+			def begin 	= virtual_memory[program].take(1)[0]
+			def end 	= (virtual_memory[program].size() - 1)
+			Range range = ((begin..end) as Range)
+			range.each{
+				memory[it] = new Word(Core.OPCODE.___, 0, 0, 0)
+				pager[((it/frames) as int)][it] = false
+			}
 		}
 	}
 
 	// Return the program position [0]=begin [1]=end
 	def grep(String program){
-		return workbook[program]
+		def begin 	= virtual_memory[program].take(1)[0]
+		def end 	= (virtual_memory[program].size() - 1)
+
+		return [begin, end] as int[]
 	}
 }
