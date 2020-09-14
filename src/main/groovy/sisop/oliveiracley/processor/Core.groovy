@@ -41,6 +41,8 @@ class Core {
 
 	private static Memory 	memory
 	private static CPU 		cpu
+	private static int 		base
+	private static int 		limit
 
 	public Core (CPU _cpu, Memory _memory){
 		memory 	= _memory
@@ -95,7 +97,8 @@ class Core {
 	// P := A
 	// PC ← [A]
 	def JMPIM (def word){
-		cpu.setPC(memory.get(word.r2).p)
+		if(legal(word.p))
+			cpu.setPC(memory.get(word.r2).p)
 	}
 	
 
@@ -103,10 +106,12 @@ class Core {
 	// R2 := Rc
 	// Rc  > 0 ? PC ← [A] : PC++
 	def JMPIGM (def word){
-		if(cpu.getRegister(word.r2) > 0){
-			cpu.setPC(memory.get(word.p).p)
-		} else {
-	    	cpu.increment()
+		if(legal(word.p)){
+			if(cpu.getRegister(word.r2) > 0){
+				cpu.setPC(memory.get(word.p).p)
+			} else {
+		    	cpu.increment()
+			}
 		}
 	}
 	
@@ -114,10 +119,12 @@ class Core {
 	// R2 := Rc
 	// Rc  < 0 ? PC ← [A] : PC++
 	def JMPILM (def word){
-		if(cpu.getRegister(word.r2) < 0){
-			cpu.setPC(memory.get(word.p).p)
-		} else {
-	    	cpu.increment()
+		if(legal(word.p)){
+			if(cpu.getRegister(word.r2) < 0){
+				cpu.setPC(memory.get(word.p).p)
+			} else {
+		    	cpu.increment()
+			}
 		}
 	}
 	
@@ -125,10 +132,12 @@ class Core {
 	// R2 := Rc
 	// Rc  = 0 ? PC ← [A] : PC++
 	def JMPIEM (def word){
-		if(cpu.getRegister(word.r2) == 0){
-			cpu.setPC(memory.get(word.p).p)
-		} else {
-	    	cpu.increment()
+		if(legal(word.p)){
+			if(cpu.getRegister(word.r2) == 0){
+				cpu.setPC(memory.get(word.p).p)
+			} else {
+		    	cpu.increment()
+			}
 		}
 	}
 
@@ -165,21 +174,27 @@ class Core {
 	// R1 := Rd
 	// Rd ← [A]
 	def LDD (def word){
-		def mem = memory.get(word.p)
-		if(mem.OpCode == OPCODE.___)
-			cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
-		else
-			cpu.setRegister(word.r1, mem.p)		
-	    cpu.increment()
+		if(legal(word.p)){
+			def mem = memory.get(word.p)
+			if(mem.OpCode == OPCODE.___){
+				if(CPU.debug)
+					println "InvalidInstruction on Core.OPCODE.LDD"
+				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+			} else
+				cpu.setRegister(word.r1, mem.p)		
+		    cpu.increment()
+		}
 	}
 	
 	// P  := A
 	// R1 := Rs
 	// [A] ← Rs
 	def STD (def word){
-	    memory.get(word.p).OpCode = Core.OPCODE.DATA;
-	    memory.get(word.p).p = cpu.getRegister(word.r1)
-	    cpu.increment()
+		if(legal(word.p)){
+		    memory.get(word.p).OpCode = Core.OPCODE.DATA;
+		    memory.get(word.p).p = cpu.getRegister(word.r1)
+		    cpu.increment()
+		}
 	}
 
 
@@ -216,17 +231,21 @@ class Core {
 	// R2 := Rs
 	// Rd ← [Rs]
 	def LDX (def word){
-		cpu.setRegister(word.r1, memory.get(cpu.getRegister(word.r2)).p)
-	    cpu.increment()
+		if(legal(cpu.getRegister(word.r2))){
+			cpu.setRegister(word.r1, memory.get(cpu.getRegister(word.r2)).p)
+		    cpu.increment()
+		}
 	}
 	
 	// R1 := Rd
 	// R2 := Rs
 	// [Rd] ← Rs
 	def STX (def word){
-	    memory.get(cpu.getRegister(word.r1)).OpCode = Core.OPCODE.DATA;
-		memory.get(cpu.getRegister(word.r1)).p = cpu.getRegister(word.r2)
-	    cpu.increment()
+		if(legal(cpu.getRegister(word.r1))){
+		    memory.get(cpu.getRegister(word.r1)).OpCode = Core.OPCODE.DATA;
+			memory.get(cpu.getRegister(word.r1)).p = cpu.getRegister(word.r2)
+		    cpu.increment()
+		}
 	}
 
 
@@ -263,11 +282,30 @@ class Core {
 
 	// HALT
 	def DATA (def word){
+		if(CPU.debug)
+			println "InvalidInstruction on Code.OPCODE.DATA"
 		cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
 	}
 
 	// HALT
 	def ___ (def word){
+		if(CPU.debug)
+			println "InvalidInstruction on Code.OPCODE.___"
 		cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+	}
+
+
+	// Runtime Auxiliar Methods --------------------
+	private boolean legal(int e) {
+		if ((e < base) || (e > limit)) {
+			cpu.setInterruption(CPU.Interrupts.InvalidAddress)
+			return false
+		}
+		return true
+	}
+
+	public set(def bounds){
+		base  = bounds.base
+		limit = bounds.limit
 	}
 }

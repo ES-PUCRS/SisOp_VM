@@ -84,7 +84,7 @@ Como parte do exercício, construa P2, um programa que le um valor de uma determ
 
 ## Como executar o código groovy
 1. Abrir o terminal na pasta raiz do projeto
-2. Executar o comando ´gradle run --args"[Kgs de chocolate]"´
+2. Executar o comando ´gradle run --args"[nome do arquivo]"´
 
 ## Como executar os testes
 1. Abrir o terminal na pasta raiz do projeto

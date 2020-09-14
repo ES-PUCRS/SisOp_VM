@@ -33,7 +33,7 @@ class CPU {
 		private boolean 	registersOutput	// Enable registers output
 		private Range[]		memoryOutput	// Configuration to output memory dump
 	//--------------------------------------------------------------------------------
-
+		public final boolean debug = false
 
 	//-Singleton Class Configuration------------
 
@@ -75,8 +75,8 @@ class CPU {
 		
 		// limit = (properties."memory.size" as int) - 1
 		// base = 0
-		pc = base
-
+		pc = base = limit = -1
+		// println memory.dumpPages(0..1)
 		// Start ui web server
 		// WebServer.riseServer()
 	}
@@ -129,6 +129,8 @@ class CPU {
 			_program,
 			HardDrive.readFile(this, _program)
 		)
+		if(debug)
+			println "\n\n\t       ${ANSI.CYAN_BACKGROUND} Program loaded ${ANSI.RESET}" + memory.dump(_program).replaceFirst("\n","")
 	}
 
 	def loadProgram(String _program){
@@ -140,6 +142,9 @@ class CPU {
 		} else {
 			interrupt = Interrupts.InvalidProgram
 		}
+
+		if(debug)
+			println "Program loaded on base: ${base} -> limit: ${limit}"
 	}
 
 	// Output --------------------------------------------------------------
@@ -180,17 +185,30 @@ class CPU {
 	private reset(){
 		interrupt = Interrupts.NoInterrupt
 		
+		memory.free((base..limit) as Range)
+
 		limit = (properties."memory.size" as int) - 1
 		base = 0;
 
 		registers = new int[8]
 		pc = base
 	}
+
+	private setCores(){
+		cores.each{
+			it.set(base: base, limit: limit)
+		}
+	}
+
+	private prepare(def instructions){
+		reset()
+		loadProgram(instructions.program)
+		setCores()
+	}
 	// ---------------------------------------------
 
 	def execute(String _program){
-		reset()
-		loadProgram(_program)
+		prepare(program: _program)
 		String output
 
 		while(interrupt == Interrupts.NoInterrupt) {
@@ -199,19 +217,19 @@ class CPU {
 				
 				// @FETCH	
 				ir = memory.get(pc)
-				
 				// @DECORE -> @EXECUTE
 				cores[0]."${ir.OpCode}"(ir)
 	
 			}
 			// @REPEAT
 		}
-
 		// ERR/OUT
 		if(interrupt != Interrupts.STOP){
 			output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
-			// println registerDump()
-			// println memory.dump([base..limit] as Range[])
+			if(debug){
+				println registerDump()
+				println memory.dump([base..limit] as Range[])
+			}
 		} else {
 			if(registersOutput)
 				output  = registerDump()
