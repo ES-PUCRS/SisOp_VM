@@ -140,6 +140,7 @@ class Memory {
 		if(virtual_memory.containsKey(program)){
 			def begin 	= virtual_memory[program].take(1)[0]
 			def end 	= (virtual_memory[program].size() - 1)
+			
 			Range range = ((begin..end) as Range)
 			range.each{
 				memory[it] = new Word(Core.OPCODE.___, 0, 0, 0)

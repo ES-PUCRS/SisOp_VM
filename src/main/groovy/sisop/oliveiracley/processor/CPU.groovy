@@ -77,7 +77,7 @@ class CPU {
 		pc = base = limit = -1
 
 		// Start ui web server
-		// WebServer.riseServer()
+		WebServer.riseServer()
 	}
 
 	//-CPU Instance Variables Access---------------------
