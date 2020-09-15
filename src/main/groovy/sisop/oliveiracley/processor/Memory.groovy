@@ -137,14 +137,10 @@ class Memory {
 
 	// Unsubscrime memory and note memory pager
 	def free(String program){
-		if(virtual_memory.containsKey(program)){
-			def begin 	= virtual_memory[program].take(1)[0]
-			def end 	= (virtual_memory[program].size() - 1)
-			
-			Range range = ((begin..end) as Range)
-			range.each{
-				memory[it] = new Word(Core.OPCODE.___, 0, 0, 0)
-				pager[((it/frames) as int)][it] = false
+		if(virtual_memory.containsKey(program)){		
+			virtual_memory[program].each {virtual, address ->
+				memory[address] = new Word(Core.OPCODE.___, 0, 0, 0)
+				pager[((address/frames) as int)][address] = false
 			}
 		}
 	}

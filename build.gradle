@@ -34,6 +34,9 @@ dependencies {
     // implementation 'javax.enterprise:cdi-api:2.0.SP1'
     // compile 'groovyx.gdi:gdi:0.1a-SNAPSHOT'
 
+    // Server
+    implementation 'org.codehaus.groovy:groovy-templates:2.0.0'
+
 	// <TESTS> JUnit 5 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'

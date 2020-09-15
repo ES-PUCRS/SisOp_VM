@@ -3,10 +3,12 @@ package sisop.oliveiracley.processor
 import groovy.transform.ThreadInterrupt
 import groovy.lang.Lazy
 
-import sisop.oliveiracley.io.HardDrive
-import sisop.oliveiracley.ui.WebServer
+import sisop.oliveiracley.ui.server.Web
 import sisop.oliveiracley.ui.ANSI
+
+import sisop.oliveiracley.io.HardDrive
 import sisop.oliveiracley.VM
+
 
 @ThreadInterrupt
 class CPU {
@@ -77,7 +79,7 @@ class CPU {
 		pc = base = limit = -1
 
 		// Start ui web server
-		WebServer.riseServer()
+		// Web.riseServer()
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -192,6 +194,10 @@ class CPU {
 
 		registers = new int[8]
 		pc = base
+	}
+
+	def free(String program){
+		memory.free(program)
 	}
 
 	private setCores(String _program){
