@@ -22,22 +22,68 @@
 
 		    load: function(...args){
 		    	const options = $.terminal.parse_options(args);
-		    	if(options.memory){
-		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + options.memory)
-		            			.then(r => r.text());
-		    	} else if (options.cpu){
-		    		return fetch('http://localhost:8080/cpu_load?file=' + options.cpu)
-		            			.then(r => r.text());
+		    	let params
+		    	let urn
+
+		    			if(options.memory)	{	urn = "cpu_load_memory"; params = options.memory; }
+		    	else 	if(options.cpu)		{	urn = "cpu_load"; params = options.cpu; }
+		    	else 	if(options.direct)	{ params = options.direct; }
+		    	else						{ this.error('Invalid argument'); return }
+
+
+		    	if(options.direct){ 
+		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
+        				.then( res => res.text() )
+        				.then( exp => {
+								if(exp == ""){
+									return fetch('http://localhost:8080/cpu_load?file=' + params)
+										.then( re => re.text() )
+										.then( ex => { if(ex != ""){ return ex } } )
+								} else { return exp	}
+    						});
+		    	} else {
+		    		return fetch('http://localhost:8080/' + urn + '?file=' + params)
+		            			.then(res => res.text())
+		            			.then(exp => { if(exp != ""){ return exp } });
 		    	}
 		    },
 
-			// dump: function(instance){
-		 //    	const options = $.terminal.parse_options(args);
-		 //    	// options.url || 
-			// 	return fetch('http://localhost:8080/cpu_execute?file=' + file)
-		 //            .then(r => r.text())
-		 //            .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
-		 //    },
+		    dump: function(...args){
+		    	const options = $.terminal.parse_options(args);
+
+		    		this.echo(options.memory.page);
+
+		    	return options.memory.page
+		    },
+
+		    // dump: function(...args){
+		    // 	const options = $.terminal.parse_options(args);
+		    // 	let params
+		    // 	let urn
+
+		    // 			if(options.memory)	{	urn = "cpu_load_memory"; params = options.memory; }
+		    // 	else 	if(options.cpu)		{	urn = "cpu_load"; params = options.cpu; }
+		    // 	else 	if(options.page)	{ params = options.direct; }
+		    // 	else						{ this.error('Invalid argument'); return }
+
+
+		    // 	if(options.direct){ 
+		    // 		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
+      //   				.then( res => res.text() )
+      //   				.then( exp => {
+						// 		if(exp == ""){
+						// 			return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
+						// 				.then( re => re.text() )
+						// 				.then( ex => { if(ex != ""){ return ex } } )
+						// 		} else { return exp	}
+    		// 				});
+		    // 	} else {
+		    // 		return fetch('http://localhost:8080/' + urn + '?file=' + params)
+		    //         			.then(res => res.text())
+		    //         			.then(exp => { if(exp != ""){ return exp } });
+		    // 	}
+		    // },
+
 
 
 		    get: async function(path) {
@@ -61,6 +107,7 @@
 
 		}, {
 			checkArity: false,
+			completion: true,
 		    greetings: 	'Sistemas Operacionais. Maquina virtual,\n'+
 						'Cleyson Braga de Oliveira'
 		});

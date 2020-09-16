@@ -29,6 +29,7 @@ class CPU {
 		private Interrupts 	interrupt 		// Processor state
 		private int[] 		registers 		// Processor registers
 		private Memory 		memory 			// RAM Memory
+		private String		program 		// Program ready for execution
 		private int 		base 			// Memory base access	(not use yet)
 		private int 		limit 			// Memory limit access	(not use yet)
 		private int 		pc 				// Program Counter
@@ -84,6 +85,7 @@ class CPU {
 		}
 		
 		pc = base = limit = -1
+		program = null
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -134,18 +136,22 @@ class CPU {
 			_program,
 			HardDrive.readFile(this, _program)
 		)
+		println memory.dump([0..30] as Range[])
 	}
 
 	def loadProgram(String _program){
+		program = _program
+		reset()
+	
 		def programBounds = memory.grep(_program)
-		
 		if(programBounds){
-			reset(_program)
 			base 	= programBounds[0]
 			limit 	= programBounds[1]
+			setCores(program)
 			return true
 		} else {
 			interrupt = Interrupts.InvalidProgram
+			program = null
 			return false
 		}
 	}
@@ -186,21 +192,15 @@ class CPU {
 		return true
 	}
 
-	private reset(String program){
-		interrupt = Interrupts.NoInterrupt
-		
-		if(base >= 0 && limit >= 0)
-			memory.free(program)
-
-		limit = -1
-		base = -1
-
+	private reset(){
+		program = null
+		base = limit = pc = -1
 		registers = new int[properties."cpu.registers" as int]
-		pc = base
+		interrupt = Interrupts.NoInterrupt
 	}
 
-	def free(String program){
-		memory.free(program)
+	def free(String _program){
+		memory.free(_program)
 	}
 
 	private setCores(String _program){
@@ -210,23 +210,30 @@ class CPU {
 	}
 
 	// ---------------------------------------------
-
-	def execute(String _program){
-		String output
-		setCores(program)
-
-		if(!output)
-		while(interrupt == Interrupts.NoInterrupt) {
-			// SHIELD
-			if(legal(pc)){
-				
-				// @FETCH	
-				ir = memory.get(_program, pc)
-				// @DECORE -> @EXECUTE
-				cores[0]."${ir.OpCode}"(ir)
+	def execute(String _program){ loadProgram(_program); execute(); }
+	def execute(){
+		if(!program)
+			return "There is no program loaded in CPU"
 	
+		String output
+		if(memory.grep(program)){
+
+			while(interrupt == Interrupts.NoInterrupt) {
+				// SHIELD
+				if(legal(pc)){
+					
+					// @FETCH	
+					ir = memory.get(program, pc)
+					// @DECORE -> @EXECUTE
+					cores[0]."${ir.OpCode}"(ir)
+		
+				}
+				// @REPEAT
 			}
-			// @REPEAT
+
+		} else {
+			output += "The program has been removed from memory between load and execution\n"
+			interrupt == Interrupts.InvalidProgram
 		}
 
 		// ERR/OUT

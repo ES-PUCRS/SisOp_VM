@@ -28,16 +28,27 @@ class Render{
 		def resp
 
 		map.each{
-			it.value.each{
-				resp = cpu.execute(it as String)
+			if((it.value as String) == "[undefined]"){
+				resp = cpu.execute()
+			} else {
+				it.value.eachWithIndex{ parm, i ->
+					def i =cpu_load(param as String)
+					if(!i){
+						resp = i
+					} else {
+						resp = cpu.execute(param as String)
+					}
+					if(i < it.value.size()){
+						resp += "\n"
+					}
+				}
 			}
 		}
 
 		def binding = ['response' : resp]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
-			.make(binding)
-
+			.make(binding)	
 	}
 
 
@@ -50,7 +61,7 @@ class Render{
 			it.value.each{
 				def i = cpu.loadProgram(it as String)
 				if(i == false)
-					resp += "Error on loading file \"${it}\"\n"
+					resp += "Error on loading file \"${it}\""
 			}
 		}
 
@@ -68,8 +79,11 @@ class Render{
 		map.each{
 			it.value.each{
 				def i = cpu.loadProgramToMemory(it as String)
-				if(i == false)
-					resp += "Error on loading file \"${it}\"\n"
+				if(i != true)
+					if(i == false)
+						resp += "Error on loading file \"${it}\""
+					else
+						resp += i	
 			}
 		}
 

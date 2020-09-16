@@ -55,7 +55,7 @@ class Web {
 						.split('&')
 						.inject([:]) { map, token -> 
     	    				token.split('=').with { 
-        						map[it[0].trim()] = it[1].trim().replace("%20","").split(',')
+        						map[it[0].trim()] = (it[1].trim().replace("%20","").split(','))
     						}
     						map
 						}

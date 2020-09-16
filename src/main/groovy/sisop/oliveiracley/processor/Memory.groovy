@@ -108,16 +108,19 @@ class Memory {
 	// Memory Manager -------------------------------------
 	// Subscribe memory with the program and allocate memory on pager
 	def loadProgram(String program, Word[] context){
-		if(context){
-			def addresses = malloc(program, context.size())
-			if(addresses){
-				context.eachWithIndex{ word, i ->
-					memory[addresses[i]] = word
+		if(!virtual_memory.containsKey(program)){
+			if(context){
+				def addresses = malloc(program, context.size())
+				if(addresses){
+					context.eachWithIndex{ word, i ->
+						memory[addresses[i]] = word
+					}
+					return true
 				}
-				return true
 			}
+			return false
 		}
-		return false
+		return "Program already loaded in memory"
 	}
 
 	// Write where the memory is been used on pager
@@ -156,8 +159,9 @@ class Memory {
 	// Return the program position [0]=begin [1]=end
 	def grep(String program){
 		if(virtual_memory.containsKey(program)){		
-			def begin 	= virtual_memory[program].take(1)[0]
+			def begin 	= 0
 			def end 	= (virtual_memory[program].size() - 1)
+
 			return [begin, end] as int[]
 		}
 		return null
