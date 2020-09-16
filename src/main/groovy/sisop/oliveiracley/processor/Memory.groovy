@@ -31,7 +31,7 @@ class Memory {
 	// Singleton constructor
 	private Memory(){
 	    this.getClass()
-	    	.getResource( VM.properties )
+	    	.getResource( VM.propertiesPath )
 	    	.withInputStream {
 	        properties.load(it)
 	    } 
@@ -77,7 +77,7 @@ class Memory {
 	def dump(Range[] ranges){
 		String output
 		if(!CPU.web)	output = "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
-		else			output = "\n\n\t\t MEMORY DUMP "
+		else			output = "\n\t\t\t MEMORY DUMP "
 
 		ranges.eachWithIndex { range, i ->
 		  	memory.getAt(range)

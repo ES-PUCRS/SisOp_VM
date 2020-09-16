@@ -69,7 +69,7 @@ class CPU {
 	private CPU(){
 	    this
 	    .getClass()
-    	.getResource( VM.properties )
+    	.getResource( VM.propertiesPath )
     	.withInputStream {
         	properties.load(it)
     	}
@@ -85,7 +85,7 @@ class CPU {
 		}
 		
 		pc = base = limit = -1
-		program = null
+		program = ""
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -140,19 +140,19 @@ class CPU {
 	}
 
 	def loadProgram(String _program){
-		program = _program
 		reset()
-	
+		
+		program = _program
 		def programBounds = memory.grep(_program)
 		if(programBounds){
-			base 	= programBounds[0]
-			limit 	= programBounds[1]
+			pc = base = programBounds[0]
+			limit = programBounds[1]
 			setCores(program)
 			return true
 		} else {
 			interrupt = Interrupts.InvalidProgram
-			program = null
-			return false
+			program = ""
+			return "Error on loading file \"${_program}\""
 		}
 	}
 
@@ -193,8 +193,10 @@ class CPU {
 	}
 
 	private reset(){
-		program = null
+		program = ""
 		base = limit = pc = -1
+		memoryOutput = null
+		registersOutput = false
 		registers = new int[properties."cpu.registers" as int]
 		interrupt = Interrupts.NoInterrupt
 	}
@@ -251,10 +253,12 @@ class CPU {
 				output += memory.dump(memoryOutput)
 		}
 	
-		if(output)
-			println output
-		else
+		if(output){
+			if(!web)
+				println output
+		} else {
 			output = "Aconteceu algo mirabolante!" 
+		}
 		return output
 	}
 }

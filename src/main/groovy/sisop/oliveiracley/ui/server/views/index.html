@@ -15,9 +15,10 @@
 		    run: function(file){
 		    	// const options = $.terminal.parse_options(args);
 		    	// options.url || 
-				return fetch('http://localhost:8080/cpu_execute?file=' + file)
+				return fetch('${url}:${port}/cpu_execute?file=' + file)
 		            .then(r => r.text())
-		            .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
+		            // .then(e => console.log(e))
+		            // .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
 		    },
 
 		    load: function(...args){
@@ -32,17 +33,17 @@
 
 
 		    	if(options.direct){ 
-		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
+		    		return fetch('${url}:${port}/cpu_load_memory?file=' + params)
         				.then( res => res.text() )
         				.then( exp => {
 								if(exp == ""){
-									return fetch('http://localhost:8080/cpu_load?file=' + params)
+									return fetch('${url}:${port}/cpu_load?file=' + params)
 										.then( re => re.text() )
 										.then( ex => { if(ex != ""){ return ex } } )
 								} else { return exp	}
     						});
 		    	} else {
-		    		return fetch('http://localhost:8080/' + urn + '?file=' + params)
+		    		return fetch('${url}:${port}/' + urn + '?file=' + params)
 		            			.then(res => res.text())
 		            			.then(exp => { if(exp != ""){ return exp } });
 		    	}

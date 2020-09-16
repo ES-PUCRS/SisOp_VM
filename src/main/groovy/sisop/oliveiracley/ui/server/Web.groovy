@@ -14,7 +14,7 @@ class Web {
 	def static importProperties(){
 		new Object() {}
 	    	.getClass()
-	    	.getResource( VM.properties )
+	    	.getResource( VM.propertiesPath )
 	    	.withInputStream {
 	        	properties.load(it)
 	    	}
@@ -35,7 +35,7 @@ class Web {
 
 		def render
 		def port = (properties."server.port" as int) ?: 2345
-		def root = new File("./src/main/groovy/sisop/oliveiracley/ui/server/views")
+		def root = new File(properties."ui.views.path")
 		def server = HttpServer.create(new InetSocketAddress(port), 0)
 
 		server.createContext("/", { HttpExchange exchange ->	
