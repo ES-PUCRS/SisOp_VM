@@ -21,8 +21,8 @@ class HardDrive {
 						"${e.getMessage()}"		+
 					"${ANSI.RESET}"
 		}
-
-		return decodeAssembly(cpu, file) //?.text
+		if(file)
+			return decodeAssembly(cpu, file) //?.text
 	}
 
 

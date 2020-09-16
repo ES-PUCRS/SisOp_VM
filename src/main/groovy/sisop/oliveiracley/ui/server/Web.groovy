@@ -25,11 +25,12 @@ class Web {
 		importProperties()
 
 		final TYPES = [
-			"css": "text/css",
-			"html": "text/html",
-			"jpg": "image/jpeg",
-			"js": "application/javascript",
-			"png": "image/png",
+			"css"	: "text/css",
+			"html"	: "text/html",
+			"jpg"	: "image/jpeg",
+			"js"	: "application/javascript",
+			"png"	: "image/png",
+			"ico"	: "image/x-icon"
 		]
 
 		def render
@@ -48,20 +49,29 @@ class Web {
 				
 				def params = [:]
 				def path = exchange.requestURI.path
-				if((exchange.requestURI as String).conteins("?")){
+				if((exchange.requestURI as String).contains("?")){
 					params = (exchange.requestURI as String)
-									  .replaceAll(".*\\?","")
+						.replaceAll(".*\\?","")
+						.split('&')
+						.inject([:]) { map, token -> 
+    	    				token.split('=').with { 
+        						map[it[0].trim()] = it[1].trim().replace("%20","").split(',')
+    						}
+    						map
+						}
 				}
 
 				println "GET $path -> Params: $params"
 
-				def file = new File(root, path.substring(1) + ".html")
+				def file = new File(root, path.substring(1))
 				if (file.isDirectory()) {
 					file = new File(file, "index.html")
-					render = Render."index"()
+					render = Render.index(params)
 				} else {
-			   		render = Render."${path.substring(1)}"()
+					file = new File(root, path.substring(1) + ".html")
+			   		render = Render."${file.name.split(/\./)[0]}"(params)
 				}
+
 
 				if (file.exists()) {
 					exchange.responseHeaders.set(
@@ -70,14 +80,16 @@ class Web {
 					)
 			        exchange.sendResponseHeaders(200, 0)
 
-			        if(render)
+			        if(render){
 						exchange.responseBody << render
-				    else
+			        } else {
 				        file.withInputStream {
 							exchange.responseBody << it
 				        }
+				    }
+
 					exchange.responseBody.close()
-				} else {		
+				} else {	
 			        exchange.sendResponseHeaders(404, 0)
 					exchange.responseBody.close()
 				}

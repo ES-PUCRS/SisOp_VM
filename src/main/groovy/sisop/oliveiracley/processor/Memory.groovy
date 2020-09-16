@@ -72,10 +72,12 @@ class Memory {
 			def end 	= (virtual_memory[program].size() - 1)
 			return dump([begin..end] as Range[])
 		}
+		return null
 	}
 	def dump(Range[] ranges){
-		String output =
-		"\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		String output
+		if(!CPU.web)	output = "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		else			output = "\n\n\t\t MEMORY DUMP "
 
 		ranges.eachWithIndex { range, i ->
 		  	memory.getAt(range)
@@ -89,8 +91,9 @@ class Memory {
 	}
 
 	def dumpPages(Range[] ranges){
-		String output =
-		"\n\n\t${ANSI.CYAN_BACKGROUND} ALLOCATED MEMORY ${ANSI.RESET}"
+		String output
+		if(!CPU.web)	output = "\n\n\t${ANSI.CYAN_BACKGROUND} ALLOCATED MEMORY ${ANSI.RESET}"
+		else			output = "\n\n\t ALLOCATED MEMORY "
 		ranges.eachWithIndex { range, i ->
 			range.each{
 				output += "\nPage: ${it}"
@@ -105,11 +108,16 @@ class Memory {
 	// Memory Manager -------------------------------------
 	// Subscribe memory with the program and allocate memory on pager
 	def loadProgram(String program, Word[] context){
-		def addresses = malloc(program, context.size())
-
-		context.eachWithIndex{ word, i ->
-			memory[addresses[i]] = word
+		if(context){
+			def addresses = malloc(program, context.size())
+			if(addresses){
+				context.eachWithIndex{ word, i ->
+					memory[addresses[i]] = word
+				}
+				return true
+			}
 		}
+		return false
 	}
 
 	// Write where the memory is been used on pager
@@ -147,9 +155,11 @@ class Memory {
 
 	// Return the program position [0]=begin [1]=end
 	def grep(String program){
-		def begin 	= virtual_memory[program].take(1)[0]
-		def end 	= (virtual_memory[program].size() - 1)
-
-		return [begin, end] as int[]
+		if(virtual_memory.containsKey(program)){		
+			def begin 	= virtual_memory[program].take(1)[0]
+			def end 	= (virtual_memory[program].size() - 1)
+			return [begin, end] as int[]
+		}
+		return null
 	}
 }

@@ -1,27 +1,70 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<title>SisOp_VM</title>
-	<style>
-		body {
-			background-color: black;
-		/}
+<head>
+	<title>SisOp_VM</title>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css"/>
+</head>
 
-		#fname{
-			color: green;
-		/}
-	</style>
+<body>
+	<script>
+		$('body').terminal({
 
-	</head>
+		    run: function(file){
+		    	// const options = $.terminal.parse_options(args);
+		    	// options.url || 
+				return fetch('http://localhost:8080/cpu_execute?file=' + file)
+		            .then(r => r.text())
+		            .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
+		    },
 
-	<body>
-		<form action="/index.html">
-			<label id="fname" for="fname">First name:</label>
-			<input type="text" id="fname" name="fname"><br><br>
-			
-			<input type="submit" value="Submit">
-		</form>
+		    load: function(...args){
+		    	const options = $.terminal.parse_options(args);
+		    	if(options.memory){
+		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + options.memory)
+		            			.then(r => r.text());
+		    	} else if (options.cpu){
+		    		return fetch('http://localhost:8080/cpu_load?file=' + options.cpu)
+		            			.then(r => r.text());
+		    	}
+		    },
 
-	</body>
+			// dump: function(instance){
+		 //    	const options = $.terminal.parse_options(args);
+		 //    	// options.url || 
+			// 	return fetch('http://localhost:8080/cpu_execute?file=' + file)
+		 //            .then(r => r.text())
+		 //            .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
+		 //    },
+
+
+		    get: async function(path) {
+		        let res = await fetch(path);
+		        return res.text();
+    		},
+
+		    cls: function(){
+		        this.exec('clear');
+		        this.echo(  'Sistemas Operacionais. Maquina virtual,\n'+
+							'Cleyson Braga de Oliveira');
+		    },
+
+		    help: function(){
+		    	this.echo(
+		    		"\n>> Help section ~" +
+		    		"\n	cls: Limpa o terminal;"+
+		    		"\n load"
+	    		);
+		    }
+
+		}, {
+			checkArity: false,
+		    greetings: 	'Sistemas Operacionais. Maquina virtual,\n'+
+						'Cleyson Braga de Oliveira'
+		});
+	</script>
+</body>
+
 </html>

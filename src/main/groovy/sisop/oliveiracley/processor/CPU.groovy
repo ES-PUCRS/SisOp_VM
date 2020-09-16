@@ -21,7 +21,7 @@ class CPU {
 	}
 
 		public static final boolean debug = false
-		// public static final boolean debug = true
+		public static boolean web
 	// Instance variables -----------------------------------------------------------
 		private static CPU instance 		// Singleton instance
 
@@ -42,10 +42,17 @@ class CPU {
 
 	// Start the VM CPU
 	def static run(String[] args){
-		def _instance = getInstance()
-		args.each{ arg -> 
-			_instance.loadProgramToMemory(arg as String)
-			_instance.execute(arg as String)
+		if(args.size() > 0) {
+			def _instance = getInstance()
+			args.each{ arg -> 
+				_instance.loadProgramToMemory(arg as String)
+				_instance.loadProgram(arg as String)
+				_instance.execute(arg as String)
+			}
+		} else {
+			// Start ui web server
+			CPU.web = true
+			Web.riseServer()
 		}
 	}
 
@@ -77,9 +84,6 @@ class CPU {
 		}
 		
 		pc = base = limit = -1
-
-		// Start ui web server
-		// Web.riseServer()
 	}
 
 	//-CPU Instance Variables Access---------------------
@@ -126,26 +130,24 @@ class CPU {
 
 	def loadProgramToMemory(String _program) {
 		// Read the assembly program
-		memory.loadProgram(
+		return memory.loadProgram(
 			_program,
 			HardDrive.readFile(this, _program)
 		)
-		if(debug)
-			println "\n\n\t       ${ANSI.CYAN_BACKGROUND} Program loaded ${ANSI.RESET}" + memory.dump(_program).replaceFirst("\n","")
 	}
 
 	def loadProgram(String _program){
 		def programBounds = memory.grep(_program)
 		
 		if(programBounds){
+			reset(_program)
 			base 	= programBounds[0]
 			limit 	= programBounds[1]
+			return true
 		} else {
 			interrupt = Interrupts.InvalidProgram
+			return false
 		}
-
-		if(debug)
-			println "Program loaded on base: ${base} -> limit: ${limit}"
 	}
 
 	// Output --------------------------------------------------------------
@@ -164,8 +166,9 @@ class CPU {
 	}
 
 	def registerDump(){
-		String output = 
-		"\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}\n"
+		String output
+		if(!CPU.web)	output = "\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}\n"
+		else			output = "\n\t        REGISTERS DUMP \n"
 		registers.eachWithIndex{ reg, i ->
 			output += "[R${i}] = ${reg}\t"
 			if((i + 1) % 3 == 0)
@@ -186,13 +189,13 @@ class CPU {
 	private reset(String program){
 		interrupt = Interrupts.NoInterrupt
 		
-		if(base >= 0 && limit <= (properties."memory.size" as int) - 1)
+		if(base >= 0 && limit >= 0)
 			memory.free(program)
 
-		limit = (properties."memory.size" as int) - 1
-		base = 0;
+		limit = -1
+		base = -1
 
-		registers = new int[8]
+		registers = new int[properties."cpu.registers" as int]
 		pc = base
 	}
 
@@ -206,17 +209,13 @@ class CPU {
 		}
 	}
 
-	private prepare(String program){
-		reset(program)
-		loadProgram(program)
-		setCores(program)
-	}
 	// ---------------------------------------------
 
 	def execute(String _program){
-		prepare(_program)
 		String output
+		setCores(program)
 
+		if(!output)
 		while(interrupt == Interrupts.NoInterrupt) {
 			// SHIELD
 			if(legal(pc)){
@@ -229,9 +228,11 @@ class CPU {
 			}
 			// @REPEAT
 		}
+
 		// ERR/OUT
 		if(interrupt != Interrupts.STOP){
-			output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
+			if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
+			else			output = (" Program interrupted with:  ${interrupt} ")
 			if(debug){
 				println registerDump()
 				println memory.dump([base..limit] as Range[])
@@ -245,6 +246,8 @@ class CPU {
 	
 		if(output)
 			println output
+		else
+			output = "Aconteceu algo mirabolante!" 
 		return output
 	}
 }
