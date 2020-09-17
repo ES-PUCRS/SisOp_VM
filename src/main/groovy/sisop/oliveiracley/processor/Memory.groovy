@@ -77,7 +77,7 @@ class Memory {
 	def dump(Range[] ranges){
 		String output
 		if(!CPU.web)	output = "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
-		else			output = "\n\t\t\t MEMORY DUMP "
+		else			output = "\n\t\t       MEMORY DUMP "
 
 		ranges.eachWithIndex { range, i ->
 		  	memory.getAt(range)
@@ -93,11 +93,11 @@ class Memory {
 	def dumpPages(Range[] ranges){
 		String output
 		if(!CPU.web)	output = "\n\n\t${ANSI.CYAN_BACKGROUND} ALLOCATED MEMORY ${ANSI.RESET}"
-		else			output = "\n\n\t ALLOCATED MEMORY "
+		else			output = "\n\t    ALLOCATED MEMORY "
 		ranges.eachWithIndex { range, i ->
 			range.each{
 				output += "\nPage: ${it}"
-				pager[it].each { frame ->
+				pager[it as int].each { frame ->
 					output += "\n\t Frame: ${String.format( "%04d", frame.key )} -> ${frame.value}"
 				}
 			}
@@ -118,7 +118,7 @@ class Memory {
 					return true
 				}
 			}
-			return false
+			return "Error on loading file \"${program}\""
 		}
 		return "Program already loaded in memory"
 	}

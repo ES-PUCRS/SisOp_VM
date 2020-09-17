@@ -73,7 +73,7 @@ class Web {
 				}
 
 
-				if (file.exists()) {
+				if (file.exists() || render) {
 					exchange.responseHeaders.set(
 						"Content-Type",
 						TYPES[file.name.split(/\./)[-1]] ?: "text/plain"

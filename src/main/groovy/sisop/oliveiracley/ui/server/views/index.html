@@ -13,12 +13,8 @@
 		$('body').terminal({
 
 		    run: function(file){
-		    	// const options = $.terminal.parse_options(args);
-		    	// options.url || 
-				return fetch('${url}:${port}/cpu_execute?file=' + file)
+				return fetch('http://localhost:8080/cpu_execute?file=' + file)
 		            .then(r => r.text())
-		            // .then(e => console.log(e))
-		            // .then(html => html.match(/<CPU>[^>]+<\/CPU>/)[0]);
 		    },
 
 		    load: function(...args){
@@ -33,17 +29,17 @@
 
 
 		    	if(options.direct){ 
-		    		return fetch('${url}:${port}/cpu_load_memory?file=' + params)
+		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
         				.then( res => res.text() )
         				.then( exp => {
 								if(exp == ""){
-									return fetch('${url}:${port}/cpu_load?file=' + params)
+									return fetch('http://localhost:8080/cpu_load?file=' + params)
 										.then( re => re.text() )
 										.then( ex => { if(ex != ""){ return ex } } )
 								} else { return exp	}
     						});
 		    	} else {
-		    		return fetch('${url}:${port}/' + urn + '?file=' + params)
+		    		return fetch('http://localhost:8080/' + urn + '?file=' + params)
 		            			.then(res => res.text())
 		            			.then(exp => { if(exp != ""){ return exp } });
 		    	}
@@ -51,39 +47,23 @@
 
 		    dump: function(...args){
 		    	const options = $.terminal.parse_options(args);
+		    	let params
+		    	let urn
 
-		    		this.echo(options.memory.page);
+		    			if(options.memory != undefined) { urn = "dump_memory"; params = options.memory; }
+		    	else 	if(options.pages  != undefined)	{ urn = "dump_pages";  params = options.pages;  }
+		    	else 	if(options.registers)			{ urn = "dump_registers"; 					  	}
+		    	else									{ this.error('Invalid argument'); return 		}
 
-		    	return options.memory.page
+		    	if(options.registers){
+		    		if(options.registers != true){
+		    			this.error('This method does not contains argument'); return 
+		    		}
+		    	}
+
+	    		return fetch('http://localhost:8080/' + urn + '?params=' + params)
+	            			.then(res => res.text());
 		    },
-
-		    // dump: function(...args){
-		    // 	const options = $.terminal.parse_options(args);
-		    // 	let params
-		    // 	let urn
-
-		    // 			if(options.memory)	{	urn = "cpu_load_memory"; params = options.memory; }
-		    // 	else 	if(options.cpu)		{	urn = "cpu_load"; params = options.cpu; }
-		    // 	else 	if(options.page)	{ params = options.direct; }
-		    // 	else						{ this.error('Invalid argument'); return }
-
-
-		    // 	if(options.direct){ 
-		    // 		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
-      //   				.then( res => res.text() )
-      //   				.then( exp => {
-						// 		if(exp == ""){
-						// 			return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
-						// 				.then( re => re.text() )
-						// 				.then( ex => { if(ex != ""){ return ex } } )
-						// 		} else { return exp	}
-    		// 				});
-		    // 	} else {
-		    // 		return fetch('http://localhost:8080/' + urn + '?file=' + params)
-		    //         			.then(res => res.text())
-		    //         			.then(exp => { if(exp != ""){ return exp } });
-		    // 	}
-		    // },
 
 
 
@@ -100,9 +80,43 @@
 
 		    help: function(){
 		    	this.echo(
-		    		"\n>> Help section ~" +
-		    		"\n	cls: Limpa o terminal;"+
-		    		"\n load"
+		    		">> Help section ~" +
+		    		
+		    		"\n [...] Optiona params"+
+		    		"\n <...> Needed params"+
+
+		    		"\n\n > cls"+
+		    		"\n Clear the terminal;"+
+		    		
+		    		"\n\n > load --memory <File || \"File1, ...,File(n)\">"+
+		    		"\n Load the file or files passed by param to the memory"+
+
+		    		"\n\n > load --cpu <File || \"File1, ...,File(n)\">"+
+		    		"\n Prepare the CPU to run the program."+
+		    		"\n If more then one file name is passed by param,"+
+		    		"\n just the last one will be ready to run."+
+
+		    		"\n\n > load --direct <File || \"File1, ...,File(n)\">"+
+		    		"\n Load to memory the files and prepare the CPU with"+
+		    		"\n the last file on the params."+
+
+		    		"\n\n > run [File || \"File1, ...,File(n)\"]"+
+		    		"\n Execute the file on the CPU if no param have"+ 
+		    		"\n been given on param."+
+		    		"\n Also can load on CPU and run all programs"+
+		    		"\n given on params"+
+
+					"\n\n > dump --memory <Program || \"Program1, ..., Program(N)\">"+
+					"\n Shows the memory from n until m real positions"+	
+
+					"\n\n > dump --memory <n..m>"+
+					"\n Shows the memory from n until m real positions"+
+
+					"\n\n > dump --pages <n..m>"+
+					"\n Shows the n until m pages of memory"+
+
+					"\n\n > dump --registers"+
+					"\n Shows the CPU registers status\n"
 	    		);
 		    }
 
@@ -110,7 +124,8 @@
 			checkArity: false,
 			completion: true,
 		    greetings: 	'Sistemas Operacionais. Maquina virtual,\n'+
-						'Cleyson Braga de Oliveira'
+						'Cleyson Braga de Oliveira' +
+						'\n=> Type help see the commands list'
 		});
 	</script>
 </body>

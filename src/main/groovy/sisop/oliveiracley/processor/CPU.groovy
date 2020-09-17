@@ -152,7 +152,7 @@ class CPU {
 		} else {
 			interrupt = Interrupts.InvalidProgram
 			program = ""
-			return "Error on loading file \"${_program}\""
+			return "Error on loading program \"${_program}\""
 		}
 	}
 
@@ -171,7 +171,7 @@ class CPU {
 			memoryOutput 	+= _memoryOutput
 	}
 
-	def registerDump(){
+	def registersDump(){
 		String output
 		if(!CPU.web)	output = "\n\t       ${ANSI.CYAN_BACKGROUND} REGISTERS DUMP ${ANSI.RESET}\n"
 		else			output = "\n\t        REGISTERS DUMP \n"
@@ -216,7 +216,7 @@ class CPU {
 	def execute(){
 		if(!program)
 			return "There is no program loaded in CPU"
-	
+
 		String output
 		if(memory.grep(program)){
 
@@ -243,12 +243,12 @@ class CPU {
 			if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
 			else			output = (" Program interrupted with:  ${interrupt} ")
 			if(debug){
-				println registerDump()
+				println registersDump()
 				println memory.dump([base..limit] as Range[])
 			}
 		} else {
 			if(registersOutput)
-				output  = registerDump()
+				output  = registersDump()
 			if(memoryOutput)
 				output += memory.dump(memoryOutput)
 		}
@@ -259,6 +259,7 @@ class CPU {
 		} else {
 			output = "Aconteceu algo mirabolante!" 
 		}
+		
 		return output
 	}
 }

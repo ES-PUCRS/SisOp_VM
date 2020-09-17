@@ -1,6 +1,7 @@
 package sisop.oliveiracley.ui.server
 
 
+import sisop.oliveiracley.processor.Memory
 import sisop.oliveiracley.processor.CPU
 import sisop.oliveiracley.VM
 
@@ -14,6 +15,7 @@ class Render{
 
 	private static final String root = "./src/main/groovy/sisop/oliveiracley/ui/server/views/"
 	private static final CPU cpu = CPU.getInstance()
+	private static final Memory memory = cpu.getMemory()
 
 	def static index(def map) {
 		if(!properties) { importProperties() }
@@ -24,20 +26,67 @@ class Render{
 		]
 		
 		return
-			new SimpleTemplateEngine()
-				.createTemplate(file)
-				.make(binding)
+			// new SimpleTemplateEngine()
+			// 	.createTemplate(file)
+			// 	.make(binding)
 	}
 
 
 
+	def static dump_pages(def map) {
+		def file = new File(root, "memory.html") 
+		def resp = ""
+
+			if(map["params"][0] == "true"){
+				def pages = ((properties."memory.size" as int) / (properties."memory.frames" as int)) -1
+				resp = cpu.getMemory().dumpPages([0..pages] as Range[])
+			} else {
+				Range[] rng = [] as Range[]
+				boolean success = true
+				String err = " is not a valid range"
+				map["params"].eachWithIndex{ it, i ->
+					if(it.size() < 4){
+						try {
+							rng += [it..it] as Range[]	
+						}catch(Exception e) { resp += rng + err; success = false }						
+					} else {
+						def tmp
+						try {
+							tmp = it.replaceAll("\\[","")
+            						.replaceAll("\\]","")
+            				rng += [tmp] as Range[]
+						}catch(Exception ex) { resp += rng + err; success = false }					
+					}
+					if(i < (it.size() - 1)){ resp += "\n" }
+				}
+				if(success){
+					resp += memory.dumpPages(rng)
+				}
+			}
+
+		resp = resp.replaceFirst("\n","")
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
 
 
 
+	def static dump_registers(def map) {
+		def file = new File(root, "cpu.html") 
+		
+			def resp = cpu.registersDump()
 
+		resp = resp.replaceFirst("\n","")
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
 
 	def static cpu_execute(def map) {
-		def file = new File(root, "cpu_execute.html") 
+		def file = new File(root, "cpu.html") 
 		def resp = ""
 
 		map.each{
@@ -51,6 +100,7 @@ class Render{
 			}
 		}
 
+		resp = resp.replaceFirst("\n","")
 		def binding = ['response' : resp]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
@@ -58,14 +108,13 @@ class Render{
 	}
 
 	def static cpu_load(def map){
-		def file = new File(root, "cpu_load.html") 
+		def file = new File(root, "template.html") 
 		def resp = ""
 
 		map.each{
-			it.value.each{
+			it.value.each{ //it, i ->
 				def i = cpu.loadProgram(it as String)
-				if(i != true)
-					resp += i
+				if(i != true) { if(!resp) resp = i else resp += "\n${i}"}
 			}
 		}
 
@@ -76,17 +125,13 @@ class Render{
 	}
 
 	def static cpu_load_memory(def map){
-		def file = new File(root, "cpu_load_memory.html") 
+		def file = new File(root, "template.html") 
 		def resp = ""
 
 		map.each{
-			it.value.each{
+			it.value.each{ //it, i ->
 				def i = cpu.loadProgramToMemory(it as String)
-				if(i != true)
-					if(i == false)
-						resp += "Error on loading file \"${it}\""
-					else
-						resp += i	
+				if(i != true) { if(!resp) resp = i else resp += "\n${i}"}
 			}
 		}
 
@@ -97,8 +142,6 @@ class Render{
 	}
 
 	def static favicon(def map) { return null }
-	def static cmd(def map) { return null }
-
 
 	def static importProperties(){
 		new Object() {}
