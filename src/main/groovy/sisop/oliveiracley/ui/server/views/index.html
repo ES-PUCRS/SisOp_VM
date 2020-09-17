@@ -17,6 +17,12 @@
 		            .then(r => r.text())
 		    },
 
+		    free: function(file){
+				return fetch('http://localhost:8080/free?file=' + file)
+		            .then(r => r.text())
+        			.then(exp => { if(exp != ""){ return exp } });
+		    },
+
 		    load: function(...args){
 		    	const options = $.terminal.parse_options(args);
 		    	let params
@@ -116,7 +122,10 @@
 					"\n Shows the n until m pages of memory"+
 
 					"\n\n > dump --registers"+
-					"\n Shows the CPU registers status\n"
+					"\n Shows the CPU registers status"+
+
+					"\n\n > free <program>"+
+					"\n Remove the program from memory.\n"
 	    		);
 		    }
 

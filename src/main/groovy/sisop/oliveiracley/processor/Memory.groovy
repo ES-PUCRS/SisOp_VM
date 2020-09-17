@@ -66,13 +66,26 @@ class Memory {
 	}
 
 	// Memory output -----------------------------------------------------------
-	def dump(String program){
-		if(virtual_memory.containsKey(program)){
-			def begin 	= virtual_memory[program].take(1)[0]
-			def end 	= (virtual_memory[program].size() - 1)
-			return dump([begin..end] as Range[])
+	def dump(String[] programs){
+		String output
+		if(!CPU.web)	output = "\n\n\t\t${ANSI.CYAN_BACKGROUND} MEMORY DUMP ${ANSI.RESET}"
+		else			output = "\n\t\t       MEMORY DUMP "
+				
+		programs.eachWithIndex{ program, i ->
+			if(virtual_memory.containsKey(program)){
+				output += "\n\t\tProgram: ${program}"
+				output += "\n[fake][real]"
+				virtual_memory[program].each{ virtual, address ->
+					output += "\n[${String.format( "%04d", (virtual as int) )}]"+
+							  "[${String.format( "%04d", (address as int) )}]"+
+							  " => ${memory[address].toString()}"
+				}
+			} else {
+				output += "Program not loaded in memory"
+				if(i < programs.size()) output += "\n"
+			}
 		}
-		return null
+		return output
 	}
 	def dump(Range[] ranges){
 		String output
@@ -82,7 +95,7 @@ class Memory {
 		ranges.eachWithIndex { range, i ->
 		  	memory.getAt(range)
 			      .eachWithIndex{ word, l ->
-					output += "\n[${String.format( "%04d", l + range[0] )}] => " + word.toString()
+					output += "\n[${String.format( "%04d", ((range[0] as int) + (l as int)) )}] => ${word.toString()}"
 				}
 			if(i != ranges.size()-1)
 				output += "\n\t\t     ..."
@@ -147,13 +160,22 @@ class Memory {
 	}
 
 	// Unsubscrime memory and note memory pager
-	def free(String program){
-		if(virtual_memory.containsKey(program)){		
-			virtual_memory[program].each {virtual, address ->
-				memory[address] = new Word(Core.OPCODE.___, 0, 0, 0)
-				pager[((address/frames) as int)][address] = false
+	def free(String program){ free([program] as String[]) }
+	def free(String[] programs){
+		String output = ""
+		programs.eachWithIndex{ program, i ->
+			if(virtual_memory.containsKey(program)){
+				virtual_memory[program].each {virtual, address ->
+					memory[address] = new Word(Core.OPCODE.___, 0, 0, 0)
+					pager[((address/frames) as int)][address] = false
+				}
+				virtual_memory.remove(program)
+			} else {
+				output += "Program not loaded in memory"
+				if(i < programs.size() -1) output += "\n"
 			}
 		}
+		return output
 	}
 
 	// Return the program position [0]=begin [1]=end

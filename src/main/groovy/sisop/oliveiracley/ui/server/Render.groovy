@@ -32,37 +32,107 @@ class Render{
 	}
 
 
+	def static free(def map) {
+		def file = new File(root, "template.html") 
+		
+			def resp = memory.free(map["file"])
 
-	def static dump_pages(def map) {
-		def file = new File(root, "memory.html") 
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
+
+
+	def static dump_memory(def map) {
+		def file = new File(root, "memory.html")
 		def resp = ""
 
-			if(map["params"][0] == "true"){
-				def pages = ((properties."memory.size" as int) / (properties."memory.frames" as int)) -1
-				resp = cpu.getMemory().dumpPages([0..pages] as Range[])
-			} else {
-				Range[] rng = [] as Range[]
-				boolean success = true
-				String err = " is not a valid range"
-				map["params"].eachWithIndex{ it, i ->
-					if(it.size() < 4){
-						try {
-							rng += [it..it] as Range[]	
-						}catch(Exception e) { resp += rng + err; success = false }						
+		if(map["params"][0] == "true"){
+			def pages = (properties."memory.size" as int) -1
+			resp = cpu.getMemory().dump([0..pages] as Range[])
+		} else {
+			Range[] rng = [] as Range[]
+			String[] str = [] as String[]
+			boolean success = true
+			String err = " is not a valid range or program name"
+			map["params"].eachWithIndex{ it, i ->
+				def attempt
+				def tmp
+				try{
+					if(!it.contains("..")){
+						attempt = [(it as int)..(it as int)] as Range[]
+						rng += attempt
 					} else {
-						def tmp
-						try {
-							tmp = it.replaceAll("\\[","")
-            						.replaceAll("\\]","")
-            				rng += [tmp] as Range[]
-						}catch(Exception ex) { resp += rng + err; success = false }					
+						tmp = it.replaceAll("\\[","")
+        						.replaceAll("\\]","")
+						tmp = tmp.split("\\.\\.")
+						attempt = [(tmp[0] as int)..(tmp[1] as int)] as Range[]
+        				rng += attempt
 					}
+				} catch(Exception e) {
+					// println e.getMessage()
+					try {
+						attempt = it as String
+						tmp = memory.grep(attempt)
+						if(tmp){ str += attempt }
+						else {success = false}
+					}catch(Exception ex)
+					{ ex.printStackTrace() }
+				}
+
+				if(!success){
+					resp += attempt + err
 					if(i < (it.size() - 1)){ resp += "\n" }
 				}
-				if(success){
-					resp += memory.dumpPages(rng)
-				}
 			}
+
+			if(rng)
+				resp += memory.dump(rng)
+			if(str)
+				resp += memory.dump(str)
+		}
+
+		resp = resp.replaceFirst("\n","")
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
+
+
+
+	def static dump_pages(def map) {
+		def file = new File(root, "memory.html")
+		def resp = ""
+
+		if(map["params"][0] == "true"){
+			def pages = ((properties."memory.size" as int) / (properties."memory.frames" as int)) -1
+			resp = cpu.getMemory().dumpPages([0..pages] as Range[])
+		} else {
+			Range[] rng = [] as Range[]
+			boolean success = true
+			String err = " is not a valid range"
+			map["params"].eachWithIndex{ it, i ->
+				if(it.size() < 4){
+					try {
+						rng += [it..it] as Range[]	
+					}catch(Exception e) { resp += rng + err; success = false }						
+				} else {
+					def tmp
+					try {
+						tmp = it.replaceAll("\\[","")
+        						.replaceAll("\\]","")
+						tmp = tmp.split("\\.\\.")
+        				rng += [tmp[0]..tmp[1]] as Range[]
+					}catch(Exception ex) { resp += rng + err; success = false }					
+				}
+				if(i < (it.size() - 1)){ resp += "\n" }
+			}
+			if(success){
+				resp += memory.dumpPages(rng)
+			}
+		}
 
 		resp = resp.replaceFirst("\n","")
 		def binding = ['response' : resp]

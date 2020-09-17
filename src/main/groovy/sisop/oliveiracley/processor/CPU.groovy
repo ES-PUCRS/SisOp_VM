@@ -232,34 +232,33 @@ class CPU {
 				}
 				// @REPEAT
 			}
+		
+			// ERR/OUT
+			if(interrupt != Interrupts.STOP){
+				if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
+				else			output = (" Program interrupted with:  ${interrupt} ")
+				if(debug){
+					println registersDump()
+					println memory.dump([base..limit] as Range[])
+				}
+			} else {
+				if(registersOutput)
+					output  = registersDump()
+				if(memoryOutput)
+					output += memory.dump(program)
+			}
+		
+			if(output){
+				if(!web)
+					println output
+			} else {
+				output = "Aconteceu algo mirabolante!" 
+			}
 
 		} else {
-			output += "The program has been removed from memory between load and execution\n"
+			output = "The program has been removed from memory between load and execution\n"
 			interrupt == Interrupts.InvalidProgram
 		}
-
-		// ERR/OUT
-		if(interrupt != Interrupts.STOP){
-			if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
-			else			output = (" Program interrupted with:  ${interrupt} ")
-			if(debug){
-				println registersDump()
-				println memory.dump([base..limit] as Range[])
-			}
-		} else {
-			if(registersOutput)
-				output  = registersDump()
-			if(memoryOutput)
-				output += memory.dump(memoryOutput)
-		}
-	
-		if(output){
-			if(!web)
-				println output
-		} else {
-			output = "Aconteceu algo mirabolante!" 
-		}
-		
 		return output
 	}
 }
