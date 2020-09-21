@@ -33,9 +33,13 @@ class Render{
 
 
 	def static free(def map) {
+		if(!properties) { importProperties() }
 		def file = new File(root, "template.html") 
-		
-			def resp = memory.free(map["file"])
+		def resp
+			if(map["file"] != ["undefined"])
+				resp = memory.free(map["file"])
+			else
+				resp = memory.free()
 
 		def binding = ['response' : resp]
 		new SimpleTemplateEngine()
