@@ -160,6 +160,14 @@ class Memory {
 	}
 
 	// Unsubscrime memory and note memory pager
+	def free(){
+		String[] progs = new String[virtual_memory.size()]
+		virtual_memory.each{
+			progs += it.key
+		}
+		free(progs)
+		return ""
+	}
 	def free(String program){ free([program] as String[]) }
 	def free(String[] programs){
 		String output = ""
