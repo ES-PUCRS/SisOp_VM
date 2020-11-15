@@ -1,5 +1,7 @@
 package sisop.oliveiracley.processor
 
+import sisop.oliveiracley.processor.process.Interrupts
+
 class Core {
 
 	enum OPCODE {
@@ -180,7 +182,7 @@ class Core {
 			if(mem.OpCode == OPCODE.___){
 				if(CPU.debug)
 					println "InvalidInstruction on Core.OPCODE.LDD"
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+				cpu.setInterruption(Interrupts.InvalidInstruction)
 			} else
 				cpu.setRegister(word.r1, mem.p)		
 		    cpu.increment()
@@ -263,7 +265,7 @@ class Core {
 	
 	// HALT
 	def STOP (def word){
-		cpu.setInterruption(CPU.Interrupts.STOP)
+		cpu.setInterruption(Interrupts.STOP)
 	}
 
 
@@ -285,21 +287,21 @@ class Core {
 	def DATA (def word){
 		if(CPU.debug)
 			println "InvalidInstruction on Code.OPCODE.DATA"
-		cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+		cpu.setInterruption(Interrupts.InvalidInstruction)
 	}
 
 	// HALT
 	def ___ (def word){
 		if(CPU.debug)
 			println "InvalidInstruction on Code.OPCODE.___"
-		cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+		cpu.setInterruption(Interrupts.InvalidInstruction)
 	}
 
 
 	// Runtime Auxiliar Methods --------------------
 	private boolean legal(int e) {
 		if ((e < base) || (e > limit)) {
-			cpu.setInterruption(CPU.Interrupts.InvalidAddress)
+			cpu.setInterruption(Interrupts.InvalidAddress)
 			return false
 		}
 		return true

@@ -6,7 +6,7 @@ plugins {
     id 'application'
 
     // Lombok plugin
-    // id "io.freefair.lombok" version "5.1.1"
+    id "io.freefair.lombok" version "5.1.1"
 }
 
 application {

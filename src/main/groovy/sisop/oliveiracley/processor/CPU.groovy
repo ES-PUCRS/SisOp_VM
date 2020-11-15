@@ -3,6 +3,13 @@ package sisop.oliveiracley.processor
 import groovy.transform.ThreadInterrupt
 import groovy.lang.Lazy
 
+
+import sisop.oliveiracley.processor.process.ProcessControlBlock
+import sisop.oliveiracley.processor.process.ProcessManager
+import sisop.oliveiracley.processor.process.Interrupts
+import sisop.oliveiracley.processor.process.PRIORITY
+import sisop.oliveiracley.processor.process.STATUS
+
 import sisop.oliveiracley.ui.server.Web
 import sisop.oliveiracley.ui.ANSI
 
@@ -16,13 +23,9 @@ class CPU {
     @Lazy
 	Properties properties
 
-	enum Interrupts {
-		NoInterrupt, InvalidAddress, InvalidInstruction, InvalidProgram, STOP;
-	}
-
 		public static final boolean debug = false
 		public static boolean web
-	// Instance variables -----------------------------------------------------------
+	// Instance variables -------------------------------------------------------------
 		private static CPU instance 		// Singleton instance
 
 		private def Word 	ir 				// Instruction register
@@ -30,14 +33,18 @@ class CPU {
 		private int[] 		registers 		// Processor registers
 		private Memory 		memory 			// RAM Memory
 		private String		program 		// Program ready for execution
-		private int 		base 			// Memory base access	(not use yet)
-		private int 		limit 			// Memory limit access	(not use yet)
+		private int 		base 			// Memory base access
+		private int 		limit 			// Memory limit access
 		private int 		pc 				// Program Counter
 		private Core[] 		cores			// CPU Core 1
 
 		private boolean 	registersOutput	// Enable registers output
 		private Range[]		memoryOutput	// Configuration to output memory dump
-	//--------------------------------------------------------------------------------
+
+		private ProcessManager pm 			// ProcessManager class to control process
+		private int 		processRunWords	// Number of words until change process
+		private int 		steps
+	//----------------------------------------------------------------------------------
 
 	//-Singleton Class Configuration------------
 
@@ -76,14 +83,16 @@ class CPU {
 
 		interrupt = Interrupts.NoInterrupt
 		
-		registers = new int[ properties."cpu.registers" as int ]
-		cores = new Core[properties."cpu.registers" as int]
-		memory = Memory.getInstance()
+		registers 	= new int [ properties."cpu.registers" as int ]
+		cores 		= new Core[ properties."cpu.registers" as int ]
+		pm 			= ProcessManager.getInstance()
+		memory 		= Memory.getInstance()
 		
 		cores.eachWithIndex { core, i -> 
 			cores[i] = new Core(this, memory)
 		}
 		
+		processRunWords = properties."process.runwords" as int
 		pc = base = limit = -1
 		program = ""
 	}
@@ -139,19 +148,26 @@ class CPU {
 		println memory.dump([0..30] as Range[])
 	}
 
-	def loadProgram(String _program){
-		reset()
+	def loadProcess(String _program){
+		// reset()
 		
-		program = _program
 		def programBounds = memory.grep(_program)
-		if(programBounds){
-			pc = base = programBounds[0]
-			limit = programBounds[1]
-			setCores(program)
+		if(programBounds){				
+			pm.newProcess(
+				new ProcessControlBlock(
+					processPriority: PRIORITY.HIGH,
+					processStatus:   STATUS.READY,
+					processName: 	 _program,
+					memoryLimit: 	 programBounds[1],
+					memoryBase: 	 programBounds[0],
+					registers: 		 new int[properties."cpu.registers" as int],
+					cursor: 		 programBounds[0]
+				)
+			)
+			println "Loaded process ${_program}"
 			return true
 		} else {
 			interrupt = Interrupts.InvalidProgram
-			program = ""
 			return "Error on loading program \"${_program}\""
 		}
 	}
@@ -214,40 +230,48 @@ class CPU {
 	// ---------------------------------------------
 	def execute(String _program){ loadProgram(_program); execute(); }
 	def execute(){
-		if(!program)
-			return "There is no program loaded in CPU"
+		if(!pm.haveProcess())
+			return "There is no process ready to run"
 
 		String output
+		steps = 0
+		def block
+		program = pm.peek().getProcessName()
 		if(memory.grep(program)){
 
-			while(interrupt == Interrupts.NoInterrupt) {
+			while(pm.haveProcess() || interrupt == Interrupts.NoInterrupt) {
+				block = runningProcess(block)
+				if(!block){	steps = 0; continue	}
+
+				if(debug)
+					println "Process:${steps}:${block}"
+				
 				// SHIELD
 				if(legal(pc)){
 					
-					// @FETCH	
+					// @FETCH
 					ir = memory.get(program, pc)
 					// @DECORE -> @EXECUTE
 					cores[0]."${ir.OpCode}"(ir)
 		
 				}
+
 				// @REPEAT
+				steps++
+				if(!pm.haveProcess() &&
+					interrupt == Interrupts.STOP)
+					runningProcess(block)
 			}
-		
-			// ERR/OUT
-			if(interrupt != Interrupts.STOP){
-				if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program interrupted with: ${ANSI.RED_UNDERLINE} ${interrupt} ${ANSI.RESET}")
-				else			output = (" Program interrupted with:  ${interrupt} ")
-				if(debug){
-					println registersDump()
-					println memory.dump([base..limit] as Range[])
-				}
-			} else {
-				if(registersOutput)
-					output  = registersDump()
-				if(memoryOutput)
-					output += memory.dump(program)
+
+			def list = pm.processedList()
+			list.each{ e ->			
+			if (e.getProcessInterruption() != Interrupts.STOP){
+				if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program ${e.getProcessName()} interrupted with: ${ANSI.RED_UNDERLINE} ${e.getProcessInterruption()} ${ANSI.RESET}")
+				else			output = (" Program ${e.getProcessName()} interrupted with:  ${e.getProcessInterruption()} \n")
+			} else if (memoryOutput)
+				output += "\n ${memory.dump(e.getProcessName())}"
 			}
-		
+
 			if(output){
 				if(!web)
 					println output
@@ -256,9 +280,65 @@ class CPU {
 			}
 
 		} else {
+			// output = pm.processed()
 			output = "The program has been removed from memory between load and execution\n"
 			interrupt == Interrupts.InvalidProgram
 		}
 		return output
+	}
+
+
+	//CPU should have a ProcessControlBlock besides those separeted variables
+	def runningProcess(ProcessControlBlock block){
+		if (steps == processRunWords || interrupt != Interrupts.NoInterrupt){
+			block.setProcessInterruption(interrupt)
+			block.setProcessName(program)
+			block.setRegisters(registers)
+			block.setMemoryLimit(limit)
+			block.setMemoryBase(base)
+			block.setCursor(pc)
+			
+			if(interrupt == Interrupts.STOP){
+				block.setProcessStatus(STATUS.DONE)
+			}
+			else if(interrupt != Interrupts.NoInterrupt)
+				block.setProcessStatus(STATUS.BLOCKED)
+
+			pm.saveProcess(block)
+		
+			if(pm.haveProcess())
+				interrupt = Interrupts.NoInterrupt
+		
+			block = null
+		} else if(steps == 0){
+			block = pm.restoreProcess()
+			if(block){
+				program 	= block.getProcessName()
+				limit		= block.getMemoryLimit()
+				base 		= block.getMemoryBase()
+				registers 	= block.getRegisters()
+				pc 			= block.getCursor()
+				setCores(program)
+
+				if(!debug)
+					println "Running process: ${program}::${block}"
+			}
+		}
+		block
+	}
+
+
+
+
+
+	def test(def map){
+		loadProgramToMemory("Assembly_sample")
+		loadProgramToMemory("Assembly_test")
+		loadProcess("Assembly_sample")
+		loadProcess("Assembly_test")
+	}
+	def testx(def map){
+		loadProgramToMemory("Assembly_sample")
+		loadProcess("Assembly_sample")
 	}
 }

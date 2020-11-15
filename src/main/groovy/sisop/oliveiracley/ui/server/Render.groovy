@@ -31,6 +31,37 @@ class Render{
 			// 	.make(binding)
 	}
 
+	def static test(def map) {
+		if(!properties) { importProperties() }
+		def file = new File(root, "template.html") 
+		def resp
+
+			// if(map["file"] != ["undefined"])
+				resp = cpu.test(map)
+			// else
+			// 	resp = cpu.test()
+
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
+
+	def static testx(def map) {
+		if(!properties) { importProperties() }
+		def file = new File(root, "template.html") 
+		def resp
+
+			// if(map["file"] != ["undefined"])
+				resp = cpu.testx(map)
+			// else
+			// 	resp = cpu.test()
+
+		def binding = ['response' : resp]
+		new SimpleTemplateEngine()
+			.createTemplate(file)
+			.make(binding)	
+	}
 
 	def static free(def map) {
 		if(!properties) { importProperties() }
@@ -187,7 +218,7 @@ class Render{
 
 		map.each{
 			it.value.each{ //it, i ->
-				def i = cpu.loadProgram(it as String)
+				def i = cpu.loadProcess(it as String)
 				if(i != true) { if(!resp) resp = i else resp += "\n${i}"}
 			}
 		}
@@ -224,5 +255,12 @@ class Render{
 	    	.withInputStream {
 	        	properties.load(it)
 	    	}
+	}
+
+
+	def static restart(def map) {
+		Runtime.
+		   getRuntime().
+		   exec("cmd /c start \"\" DevTools.bat");
 	}
 }

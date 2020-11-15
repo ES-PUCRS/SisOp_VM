@@ -74,7 +74,7 @@ class Memory {
 		programs.eachWithIndex{ program, i ->
 			if(virtual_memory.containsKey(program)){
 				output += "\n\t\tProgram: ${program}"
-				output += "\n[fake][real]"
+				output += "\n[virt][real]"
 				virtual_memory[program].each{ virtual, address ->
 					output += "\n[${String.format( "%04d", (virtual as int) )}]"+
 							  "[${String.format( "%04d", (address as int) )}]"+
@@ -188,10 +188,9 @@ class Memory {
 
 	// Return the program position [0]=begin [1]=end
 	def grep(String program){
-		if(virtual_memory.containsKey(program)){		
+		if(virtual_memory.containsKey(program)){
 			def begin 	= 0
 			def end 	= (virtual_memory[program].size() - 1)
-
 			return [begin, end] as int[]
 		}
 		return null
