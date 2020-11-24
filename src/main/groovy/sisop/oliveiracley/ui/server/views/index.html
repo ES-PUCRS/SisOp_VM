@@ -14,21 +14,22 @@
 		$('body').terminal({
 
 		    test: function(){
-				fetch('http://localhost:' + window.port + '/test')
+				fetch('http://localhost:8080/test')
 		            .then(r => r.text())
 		    },
+		    
 		    testx: function(){
-				fetch('http://localhost:' + window.port + '/testx')
+				fetch('http://localhost:8080/testx')
 		            .then(r => r.text())
 		    },
 
 		    run: function(file){
-				return fetch('http://localhost:' + window.port + '/cpu_execute?file=' + file)
+				return fetch('http://localhost:8080/cpu_execute?file=' + file)
 		            .then(r => r.text())
 		    },
 
 		    free: function(file){
-				return fetch('http://localhost:' + window.port + '/free?file=' + file)
+				return fetch('http://localhost:8080/free?file=' + file)
 		            .then(r => r.text())
         			.then(exp => { if(exp != ""){ return exp } });
 		    },
@@ -45,17 +46,17 @@
 
 
 		    	if(options.direct){ 
-		    		return fetch('http://localhost:' + window.port + '/cpu_load_memory?file=' + params)
+		    		return fetch('http://localhost:8080/cpu_load_memory?file=' + params)
         				.then( res => res.text() )
         				.then( exp => {
 								if(exp == ""){
-									return fetch('http://localhost:' + window.port + '/cpu_load?file=' + params)
+									return fetch('http://localhost:8080/cpu_load?file=' + params)
 										.then( re => re.text() )
 										.then( ex => { if(ex != ""){ return ex } } )
 								} else { return exp	}
     						});
 		    	} else {
-		    		return fetch('http://localhost:' + window.port + '/' + urn + '?file=' + params)
+		    		return fetch('http://localhost:8080/' + urn + '?file=' + params)
 		            			.then(res => res.text())
 		            			.then(exp => { if(exp != ""){ return exp } });
 		    	}
@@ -77,7 +78,7 @@
 		    		}
 		    	}
 
-	    		return fetch('http://localhost:' + window.port + '/' + urn + '?params=' + params)
+	    		return fetch('http://localhost:8080/' + urn + '?params=' + params)
 	            			.then(res => res.text());
 		    },
 
@@ -95,7 +96,7 @@
 		    },
 
 		    restart: function(){
-				fetch('http://localhost:' + window.port + '/restart')
+				fetch('http://localhost:8080/restart')
 		            .then(r => r.text())
 		    },
 

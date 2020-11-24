@@ -15,7 +15,7 @@ class ProcessControlBlock
 
 	private static	 	serial = 0
 	private final int	id = serial++
-	Interrupts			processInterruption		
+	Interrupts			processInterruption
 	PRIORITY 			processPriority
 	STATUS 				processStatus
 	String				processName

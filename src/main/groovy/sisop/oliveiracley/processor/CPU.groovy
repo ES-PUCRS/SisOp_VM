@@ -272,12 +272,9 @@ class CPU {
 				output += "\n ${memory.dump(e.getProcessName())}"
 			}
 
-			if(output){
+			if(output)
 				if(!web)
 					println output
-			} else {
-				output = "Aconteceu algo mirabolante!" 
-			}
 
 		} else {
 			// output = pm.processed()
