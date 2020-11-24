@@ -9,6 +9,7 @@ class ProcessManager {
 
 	private Queue<ProcessControlBlock> processedList
 	private Queue<ProcessControlBlock> processList
+	private Queue<ProcessControlBlock> blockedList
 	private static ProcessManager instance
 
 	static ProcessManager getInstance() { 
@@ -19,6 +20,7 @@ class ProcessManager {
 	private ProcessManager(){
 		processedList = new LinkedList()
 		processList = new PriorityQueue()
+		blockedList = new PriorityQueue()
 	}
 
 
@@ -28,7 +30,10 @@ class ProcessManager {
 		else{
 			if 		(e.getProcessPriority().value == 3) e.setProcessPriority(PRIORITY.MEDIUM)
 			else if (e.getProcessPriority().value == 2)	e.setProcessPriority(PRIORITY.LOW)
-			processList.add(e)
+			
+			if(e.getProcessStatus() == STATUS.BLOCKED) 
+				 blockedList.add(e)
+			else processList.add(e)
 		}
 	}
 
