@@ -261,6 +261,12 @@ class Render{
 	def static restart(def map) {
 		Runtime.
 		   getRuntime().
-		   exec("cmd /c start \"\" DevTools.bat");
+		   exec("cmd /c start \"\" DevTools.bat 0");
+	}
+
+	def static commit(def map) {
+		Runtime.
+		   getRuntime().
+		   exec("cmd /c start \"\" DevTools.bat 1 \"${map["comment"]}\"");
 	}
 }

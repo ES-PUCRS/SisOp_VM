@@ -13,16 +13,6 @@
 		const port = "8080";
 		$('body').terminal({
 
-		    test: function(){
-				fetch('http://localhost:8080/test')
-		            .then(r => r.text())
-		    },
-		    
-		    testx: function(){
-				fetch('http://localhost:8080/testx')
-		            .then(r => r.text())
-		    },
-
 		    run: function(file){
 				return fetch('http://localhost:8080/cpu_execute?file=' + file)
 		            .then(r => r.text())
@@ -95,8 +85,25 @@
 							'Cleyson Braga de Oliveira');
 		    },
 
+
+		    // DEV TOOLS FUNCTIONS
+		    test: function(){
+				fetch('http://localhost:8080/test')
+		            .then(r => r.text())
+		    },
+		    
+		    testx: function(){
+				fetch('http://localhost:8080/testx')
+		            .then(r => r.text())
+		    },
+
 		    restart: function(){
 				fetch('http://localhost:8080/restart')
+		            .then(r => r.text())
+		    },
+
+		    commit: function(comment){
+				fetch('http://localhost:8080/commit?comment='+comment)
 		            .then(r => r.text())
 		    },
 
