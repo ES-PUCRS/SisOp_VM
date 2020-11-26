@@ -6,7 +6,7 @@ import sisop.oliveiracley.processor.process.STATUS
 import groovy.transform.MapConstructor
 import lombok.Getter
 import lombok.Setter
- 
+
 @Getter
 @Setter
 @MapConstructor

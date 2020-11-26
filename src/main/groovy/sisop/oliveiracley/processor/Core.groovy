@@ -30,12 +30,14 @@ class Core {
 	/* 18 */ LDX	 	( 1,2 ), //	 LDX  Rd,[Rs]  | Rd   ← [Rs]			  |	Rd	|	Rs	|	| Indirect load from memory	   //
 	/* 19 */ STX	 	( 1,2 ), //	 STX [Rd],Rs   | [Rd] ← Rs				  |	Rd	|	Rs	|	| Indirect storage to memory   //
 	//=====[ R1 - TYPE INSTRUCTIONS ]==========================================================================================//
-	/* 20 */ SWAP	 	( 1,2 ), //	SWAP Ra, Rb    | T ← Ra; Ra ← Rb; Rb ← T  |	Ra	|	Rb	|	| SWAP registers		       //
+	/* 20 */ SWAP	 	( 1,2 ), //	 SWAP Ra, Rb   | T ← Ra; Ra ← Rb; Rb ← T  |	Ra	|	Rb	|	| SWAP registers		       //
 	/* 21 */ STOP	 	(  0  ), // 			   |			 			  |		|		|	| STOP (HALT)				   //
 	//=====[ Control PARAMETERS ]==============================================================================================//
 	/* -- */ CONF	 	(1,2,3), // 			   |						  |		|		|	| Configure CPU output 	       //
-	/* -- */ DATA 	 	(  3  ), // 			   |						  |		|		|	| Memory addess has data 	   //
-	/* -- */ ___		(  0  ); // 			   |						  |		|		|	| Memory addess is empty	   //
+	/* -- */ DATA 	 	(  3  ), // 			   |						  |		|		| D | Memory addess has data 	   //
+	/* -- */ ___		(  0  ), // 			   |						  |		|		|	| Memory addess is empty	   //
+	//=====[ Process PARAMETERS ]==============================================================================================//
+	/* -- */ TRAP	 	(  0  ); //    Put the process to STATUS.BLOCKED until the Thread Console respond the IO request       //
 	//=========================================================================================================================//
 		private final int[] value
 		OPCODE(int[] value) { this.value = value }
@@ -268,7 +270,6 @@ class Core {
 		cpu.setInterruption(Interrupts.STOP)
 	}
 
-
 	// Mine option
 	// Configure CPU output
 	def CONF (def word){
@@ -281,6 +282,14 @@ class Core {
 		cpu.setOutputConfiguration(word.p as boolean, [memoryOutput] as Range[])
 		cpu.increment()
 	}
+
+	/*=====[ R1 - TYPE INSTRUCTIONS ]===============================================================================*/
+	
+	// TRAP
+	def TRAP (def word){
+		cpu.setInterruption(Interrupts.IOInterrupt)
+	}
+
 	/*==============================================================================================================*/
 
 	// HALT

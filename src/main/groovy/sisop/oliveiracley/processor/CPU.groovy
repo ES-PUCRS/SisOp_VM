@@ -18,7 +18,8 @@ import sisop.oliveiracley.VM
 
 
 @ThreadInterrupt
-class CPU {
+class CPU 
+	extends Thread {
 
     @Lazy
 	Properties properties
@@ -42,8 +43,10 @@ class CPU {
 		private Range[]		memoryOutput	// Configuration to output memory dump
 
 		private ProcessManager pm 			// ProcessManager class to control process
-		private int 		processRunWords	// Number of words until change process
+		private int 		quantum			// Number of words until change process
 		private int 		steps
+
+		private String 		output 			// Request response interface
 	//----------------------------------------------------------------------------------
 
 	//-Singleton Class Configuration------------
@@ -92,7 +95,7 @@ class CPU {
 			cores[i] = new Core(this, memory)
 		}
 		
-		processRunWords = properties."process.runwords" as int
+		quantum = properties."cpu.quantum" as int
 		pc = base = limit = -1
 		program = ""
 	}
@@ -230,10 +233,15 @@ class CPU {
 	// ---------------------------------------------
 	def execute(String _program){ loadProgram(_program); execute(); }
 	def execute(){
-		if(!pm.haveProcess())
-			return "There is no process ready to run"
+		this.start()
+		this.join()
+		output
+	}
 
-		String output
+	public void run(){
+		if(!pm.haveProcess())
+			output = "There is no process ready to run"
+
 		steps = 0
 		def block
 		program = pm.peek().getProcessName()
@@ -281,13 +289,12 @@ class CPU {
 			output = "The program has been removed from memory between load and execution\n"
 			interrupt == Interrupts.InvalidProgram
 		}
-		return output
 	}
 
 
 	//CPU should have a ProcessControlBlock besides those separeted variables
 	def runningProcess(ProcessControlBlock block){
-		if (steps == processRunWords || interrupt != Interrupts.NoInterrupt){
+		if (steps == quantum || interrupt != Interrupts.NoInterrupt){
 			block.setProcessInterruption(interrupt)
 			block.setProcessName(program)
 			block.setRegisters(registers)
@@ -295,11 +302,10 @@ class CPU {
 			block.setMemoryBase(base)
 			block.setCursor(pc)
 			
-			if(interrupt == Interrupts.STOP){
-				block.setProcessStatus(STATUS.DONE)
-			}
-			else if(interrupt != Interrupts.NoInterrupt)
+			if (interrupt == Interrupts.IOInterrupt){
 				block.setProcessStatus(STATUS.BLOCKED)
+			} else if (interrupt != Interrupts.NoInterrupt)
+				block.setProcessStatus(STATUS.DONE)
 
 			pm.saveProcess(block)
 		

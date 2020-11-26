@@ -11,5 +11,10 @@ enum STATUS {
 }
 
 enum Interrupts {
-	NoInterrupt, InvalidAddress, InvalidInstruction, InvalidProgram, STOP;
+	NoInterrupt,
+	InvalidAddress,
+	InvalidInstruction,
+	InvalidProgram,
+	IOInterrupt,
+	STOP;
 }
