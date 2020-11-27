@@ -32,6 +32,6 @@ class ProcessControlBlock
 
 	@Override
     public String toString(){
-    	"[id:${id}, prog:${processName}, priority:${processPriority}, status:${processStatus}, cursor:${cursor}, registers:${registers}]"
+    	"[ id:${id}, prog:${processName}, priority:${processPriority}, status:${processStatus}, cursor:${cursor} ]"
     }
 }

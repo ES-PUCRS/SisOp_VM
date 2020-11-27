@@ -324,7 +324,7 @@ class CPU
 				setCores(program)
 
 				if(!debug)
-					println "Running process: ${program}::${block}"
+					println "Running:: ${block}"
 			}
 		}
 		block

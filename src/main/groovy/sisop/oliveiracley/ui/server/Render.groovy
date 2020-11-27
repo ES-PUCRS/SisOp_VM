@@ -12,59 +12,58 @@ class Render{
 
 	@Lazy
 	private static Properties properties
+	private static final ProcessManager pm 	= ProcessManager.getInstance()
+	private static final Memory memory 		= cpu.getMemory()
+	private static final String root 		= importProperties()
+	private static final CPU cpu 			= CPU.getInstance()
 
-	private static final String root = "./src/main/groovy/sisop/oliveiracley/ui/server/views/"
-	private static final CPU cpu = CPU.getInstance()
-	private static final Memory memory = cpu.getMemory()
-
-	def static index(def map) {
-		if(!properties) { importProperties() }
-		def file = new File(root, "index.html") 
-		def binding = [
-			'port' 	: 	properties."server.port" as int,
-			'url' 	: 	properties."server.url"
-		]
-		
-		return
-			// new SimpleTemplateEngine()
-			// 	.createTemplate(file)
-			// 	.make(binding)
-	}
-
-	def static test(def map) {
-		if(!properties) { importProperties() }
-		def file = new File(root, "template.html") 
+	def static shell(def map) {	null }
+	def static console(def map) {		
+		def file = new File(root, "console.html")
+ 		def enable = "disabled value=\"There is no queued request to IO write.\""
 		def resp
+	
 
-			// if(map["file"] != ["undefined"])
-				resp = cpu.test(map)
-			// else
-			// 	resp = cpu.test()
 
-		def binding = ['response' : resp]
+		def binding = ['writeDisabled' : enable]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
-			.make(binding)	
+			.make(binding)
 	}
 
-	def static testx(def map) {
-		if(!properties) { importProperties() }
-		def file = new File(root, "template.html") 
-		def resp
+			def static test(def map) {
+				def file = new File(root, "template.html") 
+				def resp
 
-			// if(map["file"] != ["undefined"])
-				resp = cpu.testx(map)
-			// else
-			// 	resp = cpu.test()
+					// if(map["file"] != ["undefined"])
+						resp = cpu.test(map)
+					// else
+					// 	resp = cpu.test()
 
-		def binding = ['response' : resp]
-		new SimpleTemplateEngine()
-			.createTemplate(file)
-			.make(binding)	
-	}
+				def binding = ['response' : resp]
+				new SimpleTemplateEngine()
+					.createTemplate(file)
+					.make(binding)	
+			}
 
-	def static free(def map) {
-		if(!properties) { importProperties() }
+			def static testx(def map) {
+				def file = new File(root, "template.html") 
+				def resp
+
+					// if(map["file"] != ["undefined"])
+						resp = cpu.testx(map)
+					// else
+					// 	resp = cpu.test()
+
+				def binding = ['response' : resp]
+				new SimpleTemplateEngine()
+					.createTemplate(file)
+					.make(binding)	
+			}
+
+
+
+	def static free(def map) {		
 		def file = new File(root, "template.html") 
 		def resp
 			if(map["file"] != ["undefined"])
@@ -179,7 +178,7 @@ class Render{
 
 
 	def static dump_registers(def map) {
-		def file = new File(root, "cpu.html") 
+		def file = new File(root, "cpu.html")
 		
 			def resp = cpu.registersDump()
 
@@ -191,6 +190,7 @@ class Render{
 	}
 
 	def static cpu_execute(def map) {
+		println root
 		def file = new File(root, "cpu.html") 
 		def resp = ""
 
@@ -246,18 +246,9 @@ class Render{
 			.make(binding)
 	}
 
-	def static favicon(def map) { return null }
-
-	def static importProperties(){
-		new Object() {}
-	    	.getClass()
-	    	.getResource( VM.propertiesPath )
-	    	.withInputStream {
-	        	properties.load(it)
-	    	}
-	}
 
 
+	// DEVTOOLS
 	def static restart(def map) {
 		Runtime.
 		   getRuntime().
@@ -268,5 +259,22 @@ class Render{
 		Runtime.
 		   getRuntime().
 		   exec("cmd /c start \"\" DevTools.bat 1 \"${map["comment"]}\"");
+	}
+
+
+
+	def static favicon(def map) { 
+		def file = new File((root+"assets"), "template.html") 
+
+	}
+
+	def static importProperties(){
+		new Object() {}
+	    	.getClass()
+	    	.getResource( VM.propertiesPath )
+	    	.withInputStream {
+	        	properties.load(it)
+	    	}
+	    properties."ui.views.path"
 	}
 }

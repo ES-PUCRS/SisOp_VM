@@ -61,16 +61,27 @@ class Web {
 						}
 				}
 
-				println "GET $path -> Params: $params"
+				if(!path.contains("console"))
+					println "GET $path -> Params: $params"
 
-				def file = new File(root, path.substring(1))
-				if (file.isDirectory()) {
-					file = new File(file, "index.html")
-					render = Render.index(params)
+				def file
+				render = null
+				if (path.contains(".ico")){
+					file = new File((root.getPath() + "/assets"), path.substring(1))
+				} else if (path.contains(".css")){
+					file = new File((root.getPath() + "/styles"), path.substring(1))
 				} else {
-					file = new File(root, path.substring(1) + ".html")
-			   		render = Render."${file.name.split(/\./)[0]}"(params)
+					file = new File(root, path.substring(1))
+					if (file.isDirectory()) {
+						file = new File(file, "shell.html")
+						render = Render.shell(params)
+					} else {
+						file = new File(root, path.substring(1) + ".html")
+				   		render = Render."${file.name.split(/\./)[0]}"(params)
+					}
 				}
+
+				
 
 
 				if (file.exists() || render) {
@@ -104,13 +115,3 @@ class Web {
 		println "Web Server started on port ${port}"
 	}
 }
-
-			   //      file.withInputStream {
-						// exchange.responseBody << it
-			   //      }
-
-				// if(path == "/index.html"){
-				// 	def str = exchange.requestURI as String
-				// 	str = str.replaceAll(".*\\?","")
-				// 	println str
-				// }
