@@ -1,6 +1,6 @@
 package sisop.oliveiracley.ui.server
 
-
+import sisop.oliveiracley.processor.process.ProcessManager
 import sisop.oliveiracley.processor.Memory
 import sisop.oliveiracley.processor.CPU
 import sisop.oliveiracley.VM
@@ -13,19 +13,24 @@ class Render{
 	@Lazy
 	private static Properties properties
 	private static final ProcessManager pm 	= ProcessManager.getInstance()
+	private static final CPU cpu 			= CPU.getInstance()
 	private static final Memory memory 		= cpu.getMemory()
 	private static final String root 		= importProperties()
-	private static final CPU cpu 			= CPU.getInstance()
 
 	def static shell(def map) {	null }
-	def static console(def map) {		
+	def static console(def map) {
 		def file = new File(root, "console.html")
- 		def enable = "disabled value=\"There is no queued request to IO write.\""
+		def writeEnabled = ""
 		def resp
 	
+		if(pm.haveProcessBlocked())
+ 			writeEnabled = "disabled value=\"There is no queued request to IO write.\""
+ 			//	TODO
+ 			//	CREATE THIS METHOD ON ProcessManager
+ 			//	DUE TO UPDATE CONSOLE WHEN THE BLOCKED
+ 			//	PROCESS GET QUEUED
 
-
-		def binding = ['writeDisabled' : enable]
+		def binding = ['writeDisabled' : writeEnabled]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
 			.make(binding)
