@@ -20,17 +20,37 @@ class Render{
 	def static shell(def map) {	null }
 	def static console(def map) {
 		def file = new File(root, "console.html")
-		def writeEnabled = ""
+		def writeDisabled 	= "disabled"
+		def readDisabled 	= "disabled"
+		def writeValue 		= "value=\"\""
+		def readValue 		= "value=\"\""
 		def resp
 	
-		if(pm.haveProcessBlocked())
- 			writeEnabled = "disabled value=\"There is no queued request to IO write.\""
- 			//	TODO
- 			//	CREATE THIS METHOD ON ProcessManager
- 			//	DUE TO UPDATE CONSOLE WHEN THE BLOCKED
- 			//	PROCESS GET QUEUED
+		if(!map.isEmpty())
+			println "Console:: ${map}"
 
-		def binding = ['writeDisabled' : writeEnabled]
+		if(pm.haveProcessBlockedRead()){
+			readDisabled = ""
+			readValue 	 = "value=\"\""
+		} else {
+			readDisabled = "disabled"
+			readValue = "value=\"There is no queued request to IO write.\""
+		} 
+
+		if(pm.haveProcessBlockedWrite()){
+			writeDisabled = ""
+			writeValue 	  = "value=\"\""
+		} else {
+			writeDisabled = "disabled"
+			writeValue 	  = "value=\"\""
+		}
+
+		def binding = [
+			'writeDisabled' : writeDisabled,
+			'writeValue'	: writeValue,
+			'readDisabled' 	: readDisabled,
+			'readValue'		: readValue,
+		]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
 			.make(binding)

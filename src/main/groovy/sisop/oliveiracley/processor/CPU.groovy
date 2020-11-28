@@ -7,6 +7,7 @@ import groovy.lang.Lazy
 import sisop.oliveiracley.processor.process.ProcessControlBlock
 import sisop.oliveiracley.processor.process.ProcessManager
 import sisop.oliveiracley.processor.process.Interrupts
+import sisop.oliveiracley.processor.process.IOREQUEST
 import sisop.oliveiracley.processor.process.PRIORITY
 import sisop.oliveiracley.processor.process.STATUS
 
@@ -155,9 +156,10 @@ class CPU
 		// reset()
 		
 		def programBounds = memory.grep(_program)
-		if(programBounds){				
+		if(programBounds){
 			pm.newProcess(
 				new ProcessControlBlock(
+					ioRequest: 		 IOREQUEST.NONE,
 					processPriority: PRIORITY.HIGH,
 					processStatus:   STATUS.READY,
 					processName: 	 _program,
@@ -248,7 +250,7 @@ class CPU
 		if(memory.grep(program)){
 
 			while(pm.haveProcess() || interrupt == Interrupts.NoInterrupt) {
-				block = runningProcess(block)
+				block = syncProcess(block)
 				if(!block){	steps = 0; continue	}
 
 				if(debug)
@@ -268,7 +270,7 @@ class CPU
 				steps++
 				if(!pm.haveProcess() &&
 					interrupt == Interrupts.STOP)
-					runningProcess(block)
+					syncProcess(block)
 			}
 
 			def list = pm.processedList()
@@ -293,7 +295,7 @@ class CPU
 
 
 	//CPU should have a ProcessControlBlock besides those separeted variables
-	def runningProcess(ProcessControlBlock block){
+	def syncProcess(ProcessControlBlock block){
 		if (steps == quantum || interrupt != Interrupts.NoInterrupt){
 			block.setProcessInterruption(interrupt)
 			block.setProcessName(program)
@@ -341,7 +343,17 @@ class CPU
 		loadProcess("Assembly_test")
 	}
 	def testx(def map){
-		loadProgramToMemory("Assembly_sample")
-		loadProcess("Assembly_sample")
+		if(steps == 0){
+			loadProgramToMemory("Assembly_sample")
+			loadProcess("Assembly_sample")
+
+			def block = syncProcess(null)
+			block.setProcessStatus(STATUS.BLOCKED)
+			block.setIoRequest(IOREQUEST.WRITE)
+			pm.saveProcess(block)
+			steps++
+		} else {
+			pm.pollBlocked()
+		}
 	}
 }

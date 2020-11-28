@@ -49,17 +49,19 @@ class Web {
 				
 				def params = [:]
 				def path = exchange.requestURI.path
-				if((exchange.requestURI as String).contains("?")){
-					params = (exchange.requestURI as String)
-						.replaceAll(".*\\?","")
-						.split('&')
-						.inject([:]) { map, token -> 
-    	    				token.split('=').with { 
-        						map[it[0].trim()] = (it[1].trim().replace("%20","").split(','))
-    						}
-    						map
-						}
-				}
+				def exchangeRequestURI = (exchange.requestURI as String)
+				if ((exchangeRequestURI.charAt(exchangeRequestURI.length()-1)) != "?")
+					if (exchangeRequestURI.contains("?")){
+						params = exchangeRequestURI
+							.replaceAll(".*\\?","")
+							.split('&')
+							.inject([:]) { map, token -> 
+	    	    				token.split('=').with { 
+	        						map[it[0].trim()] = (it[1].trim().replace("%20","").split(','))
+	    						}
+	    						map
+							}
+					}
 
 				if(!path.contains("console"))
 					println "GET $path -> Params: $params"

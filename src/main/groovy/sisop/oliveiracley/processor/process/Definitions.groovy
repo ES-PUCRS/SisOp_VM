@@ -10,6 +10,10 @@ enum STATUS {
 	READY, BLOCKED, DONE;
 }
 
+enum IOREQUEST {
+	NONE, WRITE, READ;
+}
+
 enum Interrupts {
 	NoInterrupt,
 	InvalidAddress,

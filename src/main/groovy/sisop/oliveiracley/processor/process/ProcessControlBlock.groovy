@@ -1,5 +1,6 @@
 package sisop.oliveiracley.processor.process
 
+import sisop.oliveiracley.processor.process.IOREQUEST
 import sisop.oliveiracley.processor.process.PRIORITY
 import sisop.oliveiracley.processor.process.STATUS
 
@@ -21,6 +22,7 @@ class ProcessControlBlock
 	String				processName
 	int 				memoryLimit
 	int 				memoryBase
+	IOREQUEST			ioRequest
 	int[] 				registers
 	int					cursor
 
