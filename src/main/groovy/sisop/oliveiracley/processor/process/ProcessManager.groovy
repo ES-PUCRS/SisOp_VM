@@ -3,6 +3,7 @@ package sisop.oliveiracley.processor.process
 import sisop.oliveiracley.processor.process.Interrupts
 import sisop.oliveiracley.processor.Memory
 import sisop.oliveiracley.processor.Core
+import sisop.oliveiracley.processor.CPU
 
 import java.util.PriorityQueue
 import java.util.ArrayList
@@ -10,6 +11,7 @@ import java.util.Queue
 
 class ProcessManager {
 
+	private static final CPU cpu 	= 	CPU.getInstance()
 	private Queue<ProcessControlBlock> 	processedList
 	private Queue<ProcessControlBlock> 	processList
 	private Queue<ProcessControlBlock> 	blockedList
@@ -30,9 +32,11 @@ class ProcessManager {
 
 
 	def saveProcess(ProcessControlBlock e){
-		if(e.getProcessStatus() == STATUS.DONE)
+		if(e.getProcessStatus() == STATUS.DONE){
+			println "FINISH PROCESS:: ${e.getProcessName()}"
 			processedList.add(e)
-		else{
+			cpu.output()
+		} else {
 			if 		(e.getProcessPriority().value == 3) e.setProcessPriority(PRIORITY.MEDIUM)
 			else if (e.getProcessPriority().value == 2)	e.setProcessPriority(PRIORITY.LOW)
 			
@@ -57,7 +61,6 @@ class ProcessManager {
 		block.setProcessInterruption(Interrupts.NoInterrupt)
 		block.setProcessStatus(STATUS.READY)
 		block.setIoRequest(IOREQUEST.NONE)
-		block.setCursor(block.getCursor() + 1)
 		processList.add(block)
 	}
 
@@ -72,11 +75,15 @@ class ProcessManager {
 	def peek() 								{ processList.peek()	 }
 	def pollBlocked() 						{ blockedList.poll()	 }
 	def newProcess(ProcessControlBlock e) 	{ processList.add(e)	 }
-	def processedList()						{ processedList 		 }
 	def restoreProcess()					{ processList.poll()	 }
 	def haveProcessBlocked()				{ !blockedList.isEmpty() }
-	def haveProcess(){ 
+	def haveProcess() { 
 		!processList.isEmpty() || !blockedList.isEmpty()
+	}
+	def processedList() { 
+		def list = processedList.clone()
+		processedList = new LinkedList()
+		list
 	}
 
 	public String processed(){

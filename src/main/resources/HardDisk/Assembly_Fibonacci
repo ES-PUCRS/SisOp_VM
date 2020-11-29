@@ -14,9 +14,9 @@ STX R7, R2
 ADDI R7, 1
 SUB R6, R7
 JMPIG R5, R6
-CONF 0, 28, 1
 TRAP 2, 28
 STOP 
+___ 
 ___ 
 ___ 
 ___ 

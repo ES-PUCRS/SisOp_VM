@@ -48,7 +48,8 @@ class CPU
 		private int 		steps
 
 		private String 		output 			// Request response interface
-		private ProcessControlBlock block
+		private ProcessControlBlock block 	// Process informations
+		private Thread 		process 		// VM parallel execution
 	//----------------------------------------------------------------------------------
 
 	//-Singleton Class Configuration------------
@@ -250,8 +251,9 @@ class CPU
 	// ---------------------------------------------
 	def execute(String _program){ loadProgram(_program); execute(); }
 	def execute(){
+
 		reset()
-		new Thread() {
+		process = new Thread() {
 		    public void run() {
 		    	if(!pm.haveProcess())
 					output = "There is no process ready to run"
@@ -259,7 +261,6 @@ class CPU
 					output = ""
 					steps = 0
 					program = pm.peek()?.getProcessName()
-					if(!program) throw new NullPointerException()
 					
 					if(memory.grep(program)){
 
@@ -287,21 +288,7 @@ class CPU
 								block = syncProcess(block)
 						}
 
-						def list = pm.processedList()
-						list.each{ e ->			
-						if (e.getProcessInterruption() != Interrupts.STOP){
-							if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program ${e.getProcessName()} interrupted with: ${ANSI.RED_UNDERLINE} ${e.getProcessInterruption()} ${ANSI.RESET}")
-							else			output = (" Program ${e.getProcessName()} interrupted with:  ${e.getProcessInterruption()} \n")
-						} else if (memoryOutput)
-							output += "\n ${memory.dump(e.getProcessName())}"
-						}
-
-						if(output)
-							if(!web)
-								println output
-
 					} else {
-						// output = pm.processed()
 						output = "The program has been removed from memory between load and execution\n"
 						interrupt == Interrupts.InvalidProgram
 					}
@@ -309,9 +296,6 @@ class CPU
 		    }
 		}.start();
 
-		// Criar um array pra com as saídas
-		// dos programas pra poder dar
-		// um get no shell
 		output
 	}
 
@@ -330,8 +314,9 @@ class CPU
 			if (interrupt == Interrupts.IOInterrupt){
 				block.setProcessStatus(STATUS.BLOCKED)
 				println "Blocking:: ${block}"
-			} else if (interrupt != Interrupts.NoInterrupt)
+			} else if (interrupt != Interrupts.NoInterrupt){
 				block.setProcessStatus(STATUS.DONE)
+			}
 
 			pm.saveProcess(block)
 		
@@ -357,48 +342,31 @@ class CPU
 		block
 	}
 
-
-
-
-	def loadProcess(String _program, int a){
-		// reset()
-		
-		def programBounds = memory.grep(_program)
-		if(programBounds){
-			pm.newProcess(
-				new ProcessControlBlock(
-					ioRequest: 		 IOREQUEST.READ,
-					processPriority: PRIORITY.HIGH,
-					processStatus:   STATUS.BLOCKED,
-					processName: 	 _program,
-					memoryLimit: 	 programBounds[1],
-					memoryBase: 	 programBounds[0],
-					registers: 		 new int[properties."cpu.registers" as int],
-					cursor: 		 programBounds[0]
-				)
-			)
-			println "Loaded process ${_program}"
-			return true
-		} else {
-			interrupt = Interrupts.InvalidProgram
-			return "Error on loading program \"${_program}\""
+	def output(){
+		def list = pm.processedList()
+		list.each{ e ->			
+			if (e.getProcessInterruption() != Interrupts.STOP){
+				if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program ${e.getProcessName()} interrupted with: ${ANSI.RED_UNDERLINE} ${e.getProcessInterruption()} ${ANSI.RESET}")
+				else			output = (" Program ${e.getProcessName()} interrupted with:  ${e.getProcessInterruption()} \n")
+			} else {
+				output += "${registersDump()}"
+				output += "\n ${memory.dump(e.getProcessName())}"
+			}
 		}
+	
+		if(!output.equals("") && output.charAt(output.length()-1) == '\n')
+	   		output = output.substring(0, output.length()-1)
+	
+		if(output)
+			if(!web)
+				println output
 	}
-
-	def test (def map){ pm.pollBlocked() }
-	def testx(def map){
-		if(steps == 0){
-			loadProgramToMemory("Assembly_Fibonacci")
-			loadProcess("Assembly_Fibonacci", 0)
-			steps++
-		} else if(steps == 1){
-			loadProgramToMemory("Assembly_test")
-			loadProcess("Assembly_test", 0)
-			steps++
-		}else if(steps == 2){
-			loadProgramToMemory("Assembly_x1")
-			loadProcess("Assembly_x1", 0)
-			steps++
-		}
+	
+	def output (def map){
+		if(output.equals(""))
+			return "\tNo program finished and responded"
+		def resp = output
+		output = ""
+		resp
 	}
 }

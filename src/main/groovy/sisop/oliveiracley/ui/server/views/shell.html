@@ -86,14 +86,8 @@
 		    },
 
 
-		    // DEV TOOLS FUNCTIONS
-		    test: function(){
-				fetch('http://localhost:8080/test')
-		            .then(r => r.text())
-		    },
-		    
-		    testx: function(){
-				fetch('http://localhost:8080/testx')
+		    output: function(){
+				return fetch('http://localhost:8080/output')
 		            .then(r => r.text())
 		    },
 

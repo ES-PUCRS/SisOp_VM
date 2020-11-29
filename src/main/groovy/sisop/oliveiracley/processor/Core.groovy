@@ -296,6 +296,7 @@ class Core {
 		cpu.setBlockIORequest(IORequest)
 		cpu.setIORegister(1, memory.get(program, word.r1).p)
 		cpu.setIORegister(0, word.p)
+		cpu.increment()
 	}
 
 	/*==============================================================================================================*/
