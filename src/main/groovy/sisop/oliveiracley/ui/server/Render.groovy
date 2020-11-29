@@ -1,6 +1,8 @@
 package sisop.oliveiracley.ui.server
 
+import sisop.oliveiracley.processor.process.ProcessControlBlock
 import sisop.oliveiracley.processor.process.ProcessManager
+import sisop.oliveiracley.processor.process.IOREQUEST
 import sisop.oliveiracley.processor.Memory
 import sisop.oliveiracley.processor.CPU
 import sisop.oliveiracley.VM
@@ -20,72 +22,76 @@ class Render{
 	def static shell(def map) {	null }
 	def static console(def map) {
 		def file = new File(root, "console.html")
-		def writeDisabled 	= "disabled"
-		def readDisabled 	= "disabled"
-		def writeValue 		= "value=\"\""
-		def readValue 		= "value=\"\""
-		def resp
-	
-		if(!map.isEmpty())
-			println "Console:: ${map}"
+		def writeList 		= ""
+		def readList 		= ""
+		
 
-		if(pm.haveProcessBlockedRead()){
-			readDisabled = ""
-			readValue 	 = "value=\"\""
-		} else {
-			readDisabled = "disabled"
-			readValue = "value=\"There is no queued request to IO write.\""
-		} 
-
-		if(pm.haveProcessBlockedWrite()){
-			writeDisabled = ""
-			writeValue 	  = "value=\"\""
-		} else {
-			writeDisabled = "disabled"
-			writeValue 	  = "value=\"\""
+		pm.filterByIORequest(IOREQUEST.READ).each { block ->
+			readList +=
+			"""
+				<form id="readForm" action="/unblock">
+					<label for="block.getProcessName()">${block.getProcessName()}</label>
+					<br>
+					<input type="text" id="${block.getProcessName()}" name="${block.getProcessName()}">
+					<br><br>
+				</form>
+			"""
 		}
+		if(readList.equals(""))
+			readList = "<p>Não há processos bloqueados aguardando leitura</p>"
 
+		pm.filterByIORequest(IOREQUEST.WRITE).each { block ->
+			writeList +=
+			"""
+				<form id="writeForm" action="/unblock">
+					<label for="block.getProcessName()">${block.getProcessName()}</label>
+					<br>
+					<input class="textField" type="text" id="${block.getProcessName()}" name="${block.getProcessName()}" value="${block.getIoRegisters()[1]}" readonly>
+					<input class="textFieldButton" type="submit" value="Free">
+					<br><br>
+				</form>
+			"""
+		}
+		if(writeList.equals(""))
+			writeList = "<p>Não há processos bloqueados aguardando escrita</p>"
+
+		
 		def binding = [
-			'writeDisabled' : writeDisabled,
-			'writeValue'	: writeValue,
-			'readDisabled' 	: readDisabled,
-			'readValue'		: readValue,
+			'writeList' : writeList,
+			'readList': readList
 		]
 		new SimpleTemplateEngine()
 			.createTemplate(file)
 			.make(binding)
 	}
 
+	def static unblock(def map) {
+
+		new Thread() {
+		    public void run() {
+		        map.each{ key, value ->
+					pm.unblock(key, (value[0] as int))
+				}
+		    }
+		}.start();		
+		
+		
+		return console(map)
+	}
+
+
+
 			def static test(def map) {
 				def file = new File(root, "template.html") 
 				def resp
 
-					// if(map["file"] != ["undefined"])
 						resp = cpu.test(map)
-					// else
-					// 	resp = cpu.test()
 
 				def binding = ['response' : resp]
 				new SimpleTemplateEngine()
 					.createTemplate(file)
-					.make(binding)	
+					.make(binding)
 			}
-
-			def static testx(def map) {
-				def file = new File(root, "template.html") 
-				def resp
-
-					// if(map["file"] != ["undefined"])
-						resp = cpu.testx(map)
-					// else
-					// 	resp = cpu.test()
-
-				def binding = ['response' : resp]
-				new SimpleTemplateEngine()
-					.createTemplate(file)
-					.make(binding)	
-			}
-
 
 
 	def static free(def map) {		
@@ -215,7 +221,6 @@ class Render{
 	}
 
 	def static cpu_execute(def map) {
-		println root
 		def file = new File(root, "cpu.html") 
 		def resp = ""
 
@@ -230,7 +235,11 @@ class Render{
 			}
 		}
 
-		resp = resp.replaceFirst("\n","")
+		if(resp)
+			resp = resp.replaceFirst("\n","")
+		else
+			resp = ""
+
 		def binding = ['response' : resp]
 		new SimpleTemplateEngine()
 			.createTemplate(file)

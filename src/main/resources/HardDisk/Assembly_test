@@ -1,6 +1,2 @@
-LDI		R1, 8
-LDI		R2, 9
-STX		R1, R2
-LDX		R5, R1
-CONF	0,10,1
+TRAP 1, 1
 STOP 

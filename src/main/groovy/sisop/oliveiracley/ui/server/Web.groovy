@@ -6,7 +6,8 @@ import groovy.lang.Lazy
 import sisop.oliveiracley.ui.server.Render
 import sisop.oliveiracley.VM
 
-class Web {
+class Web
+	extends Thread {
 
 	@Lazy
 	private static Properties properties
@@ -20,10 +21,9 @@ class Web {
 	    	}
 	}
 
+	private Web(){ importProperties() }
 
-	def static riseServer(){
-		importProperties()
-
+	public void run(){
 		final TYPES = [
 			"css"	: "text/css",
 			"html"	: "text/html",
@@ -56,8 +56,8 @@ class Web {
 							.replaceAll(".*\\?","")
 							.split('&')
 							.inject([:]) { map, token -> 
-	    	    				token.split('=').with { 
-	        						map[it[0].trim()] = (it[1].trim().replace("%20","").split(','))
+	    	    				token.split('=').with {
+	        						map[it[0]?.trim()] = (it[1]?.trim()?.replace("%20","")?.split(','))
 	    						}
 	    						map
 							}
@@ -108,7 +108,8 @@ class Web {
 				}
 
 			} catch(e) {
-				e.printStackTrace()
+				println e.getLineNumber()
+				println e.getMessage()
 			}
 
 		} as HttpHandler)

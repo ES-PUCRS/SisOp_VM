@@ -1,6 +1,7 @@
 package sisop.oliveiracley.processor
 
 import sisop.oliveiracley.processor.process.Interrupts
+import sisop.oliveiracley.processor.process.IOREQUEST
 
 class Core {
 
@@ -37,7 +38,7 @@ class Core {
 	/* -- */ DATA 	 	(  3  ), // 			   |						  |		|		| D | Memory addess has data 	   //
 	/* -- */ ___		(  0  ), // 			   |						  |		|		|	| Memory addess is empty	   //
 	//=====[ Process PARAMETERS ]==============================================================================================//
-	/* -- */ TRAP	 	(  0  ); //    Put the process to STATUS.BLOCKED until the Thread Console respond the IO request       //
+	/* -- */ TRAP	 	( 3,1 ); // TREAD [Rs], k  | k=1? [Rs]->IO : [RS]<-IO | Rs  |       | K |                              //
 	//=========================================================================================================================//
 		private final int[] value
 		OPCODE(int[] value) { this.value = value }
@@ -283,11 +284,18 @@ class Core {
 		cpu.increment()
 	}
 
-	/*=====[ R1 - TYPE INSTRUCTIONS ]===============================================================================*/
+	/*=====[ Process PARAMETERS ]===============================================================================*/
 	
 	// TRAP
 	def TRAP (def word){
+		def IORequest
+		IORequest = word.p
+		if (IORequest == 1)	IORequest = IOREQUEST.READ
+		else				IORequest = IOREQUEST.WRITE
 		cpu.setInterruption(Interrupts.IOInterrupt)
+		cpu.setBlockIORequest(IORequest)
+		cpu.setIORegister(1, memory.get(program, word.r1).p)
+		cpu.setIORegister(0, word.p)
 	}
 
 	/*==============================================================================================================*/

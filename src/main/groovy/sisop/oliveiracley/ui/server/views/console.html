@@ -3,29 +3,22 @@
 	<head>
 		<link rel="stylesheet" href="console.css">
 		<title>SisOp_VM: Console</title>
-		<meta http-equiv="refresh" content="5;url=http://localhost:8080/console">
+		<meta http-equiv="refresh" content="4;url=http://localhost:8080/console">
 	</head>
 
 	<body>	
 		<div class="dashboard">
+
 			<div class="block">
 				<h1>Read</h1>
-				<form id="readForm" action="/console">
-					<input type="text" id="readio" name="readio" ${readDisabled} ${readValue}><br><br> 
-
-					<input class="button" type="submit" value="Submit" ${readDisabled}>
-				</form>
+					${readList}
 			</div>
-
 
 			<div class="block">
 				<h1>Write</h1>
-				<form>
-					<input type="text" id="writeio" name="writeio" disabled ${writeValue}><br><br>
-
-					<input class="button" type="submit" value="Free" ${writeDisabled}>
-				</form>
+					${writeList}
 			</div>
+
 		</div>
 	</body>
 </html>

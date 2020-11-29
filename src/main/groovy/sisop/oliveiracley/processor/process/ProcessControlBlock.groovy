@@ -24,6 +24,7 @@ class ProcessControlBlock
 	int 				memoryBase
 	IOREQUEST			ioRequest
 	int[] 				registers
+	int[] 				ioRegisters
 	int					cursor
 
 
@@ -34,6 +35,11 @@ class ProcessControlBlock
 
 	@Override
     public String toString(){
-    	"[ id:${id}, prog:${processName}, priority:${processPriority}, status:${processStatus}, cursor:${cursor} ]"
+    	if(processStatus == STATUS.READY)
+    		return "[ id:${id}, prog:${processName}, priority:${processPriority}, status:${processStatus}, cursor:${cursor} ]"
+    	if(processStatus == STATUS.BLOCKED)
+    		return "[ id:${id}, prog:${processName}, priority:${processPriority}, ioRequest:${ioRequest}, ioRegisters:${ioRegisters} ]"
+    	if(processStatus == STATUS.DONE)
+    		return "[ id:${id}, prog:${processName}, status:${processStatus}, memoryBase:${memoryBase}, memoryLimit:${memoryLimit} ]"
     }
 }

@@ -1,18 +1,22 @@
 package sisop.oliveiracley.processor.process
 
 import sisop.oliveiracley.processor.process.Interrupts
+import sisop.oliveiracley.processor.Memory
+import sisop.oliveiracley.processor.Core
 
 import java.util.PriorityQueue
+import java.util.ArrayList
 import java.util.Queue
 
 class ProcessManager {
 
-	private Queue<ProcessControlBlock> processedList
-	private Queue<ProcessControlBlock> processList
-	private Queue<ProcessControlBlock> blockedList
-	private static ProcessManager instance
+	private Queue<ProcessControlBlock> 	processedList
+	private Queue<ProcessControlBlock> 	processList
+	private Queue<ProcessControlBlock> 	blockedList
+	private static ProcessManager 		instance
+	private Memory 						memory 
 
-	static ProcessManager getInstance() { 
+	static ProcessManager getInstance() {
 		if (!instance) instance = new ProcessManager()
 		return instance
 	}
@@ -20,7 +24,8 @@ class ProcessManager {
 	private ProcessManager(){
 		processedList = new LinkedList()
 		processList = new PriorityQueue()
-		blockedList = new PriorityQueue()
+		blockedList = new LinkedList()
+		memory = Memory.getInstance()
 	}
 
 
@@ -37,14 +42,31 @@ class ProcessManager {
 		}
 	}
 
+	def unblock( String program, int value ){
+		def block = blockedList.find { blk ->  
+			blk.getProcessName() == program
+		}
 
-	def haveProcessBlockedRead()  { filter(IOREQUEST.READ)  }
-	def haveProcessBlockedWrite() {	filter(IOREQUEST.WRITE) }
-	private boolean filter(IOREQUEST ioRequest) {
-		def array = blockedList.toArray().findAll { block ->
+		blockedList.remove(block)
+
+		if(block.getIoRequest() == IOREQUEST.READ){
+			memory.get(block.getProcessName(), block.getIoRegisters()[0]).OpCode = Core.OPCODE.DATA;
+			memory.get(block.getProcessName(), block.getIoRegisters()[0]).p = value
+		}
+
+		block.setProcessInterruption(Interrupts.NoInterrupt)
+		block.setProcessStatus(STATUS.READY)
+		block.setIoRequest(IOREQUEST.NONE)
+		block.setCursor(block.getCursor() + 1)
+		processList.add(block)
+	}
+
+	def haveProcessBlockedRead()  { !filterByIORequest(IOREQUEST.READ).isEmpty()  }
+	def haveProcessBlockedWrite() {	!filterByIORequest(IOREQUEST.WRITE).isEmpty() }
+	def filterByIORequest(IOREQUEST ioRequest) {
+		blockedList.toArray().findAll { block ->
 			block.getIoRequest() == ioRequest
 		}
-		!array.isEmpty()
 	}
 
 	def peek() 								{ processList.peek()	 }
@@ -67,6 +89,7 @@ class ProcessManager {
 	public String toString(){
 		def resp = ""
 		processList.each { i -> resp+="\n\t${i}"}
+		blockedList.each { i -> resp+="\n\t${i}"}
 		return resp.replaceFirst("\n","")
 	}
 }

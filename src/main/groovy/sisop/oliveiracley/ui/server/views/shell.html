@@ -14,7 +14,7 @@
 		$('body').terminal({
 
 		    run: function(file){
-				return fetch('http://localhost:8080/cpu_execute?file=' + file)
+				fetch('http://localhost:8080/cpu_execute?file=' + file)
 		            .then(r => r.text())
 		    },
 

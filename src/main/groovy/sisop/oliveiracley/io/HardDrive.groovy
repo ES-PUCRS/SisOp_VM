@@ -1,5 +1,6 @@
 package sisop.oliveiracley.io
 
+import sisop.oliveiracley.processor.process.Interrupts
 import sisop.oliveiracley.processor.Memory
 import sisop.oliveiracley.processor.Word
 import sisop.oliveiracley.processor.Core
@@ -44,7 +45,7 @@ class HardDrive {
 
 			word = word.split(",")
 			word.eachWithIndex{ param, p -> 
-				if(param.toUpperCase().contains("R"))
+				if(param.toUpperCase().contains("R") && !param.toUpperCase().equals("TRAP"))
 					word[p] = word[p].replaceFirst("R|r","")
 					// This line does exist if the register is on 1..8
 					// word[p] = (word[p] as int) - 1 
@@ -56,7 +57,7 @@ class HardDrive {
 				temp[i] = translator(word)
 			} catch (Exception e){
 				println "*** Invalided on LOAD ${i}, ${word}"
-				cpu.setInterruption(CPU.Interrupts.InvalidInstruction)
+				cpu.setInterruption(Interrupts.InvalidInstruction)
 			}
 		}
 	
