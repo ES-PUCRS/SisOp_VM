@@ -56,7 +56,7 @@ class HardDrive {
 			try{
 				temp[i] = translator(word)
 			} catch (Exception e){
-				println "*** Invalided on LOAD ${i}, ${word}"
+				println "${ANSI.RED_BOLD}***${ANSI.RESET} Invalided on LOAD ${i}, ${word[0]}"
 				cpu.setInterruption(Interrupts.InvalidInstruction)
 			}
 		}
@@ -70,7 +70,12 @@ class HardDrive {
 		int r1, r2, p
 		r1 = r2 = p = 0
 
-		opcode = Core.OPCODE."${word[0].toUpperCase()}"
+
+		if (word.contains("STOP"))		opcode = Core.OPCODE.STOP
+		else if(word.contains("___"))	opcode = Core.OPCODE."___"
+		else opcode = Core.OPCODE."${word[0].toUpperCase()}"
+	
+
 		if( opcode.value.size() != word.size()-1 &&
 			opcode != Core.OPCODE.STOP )
 			throw new NoSuchFieldException()

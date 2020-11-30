@@ -5,7 +5,6 @@ Desenvolvimento da maquina virtual
 ## Projeto de desenvolvimento da VM
 
 ### 1. Definição da Máquina Virtual (MV)
-Nossa máquina virtual (MV) tem CPU e Memória.
 
 - [x] 1.1 CPU
 O processador possui os seguintes registradores:
@@ -41,7 +40,7 @@ A CPU executa o ciclo de instruções. Dado um valor no PC, ela faz:
  fimLoop
 Um vetor de interrupções associa o código da interrupção com a rotina a ser executada.
 
-- [ ] 1.4 Programas
+- [X] 1.4 Programas
 Neste momento não temos um Sistema Operacional. Para fazer a Máquina Virtual funcionar, você deve carregar um
 programa no início da memória, atribuir um valor ao PC (o início do código do seu programa), e liberar a CPU para executar.
 A CPU vai executar até parar, encontrar um erro, ou então vai entrar em loop conforme o programa estiver correto ou não.
@@ -60,12 +59,10 @@ Como parte do exercício, construa P2, um programa que le um valor de uma determ
 
 
 
-
-
-
 ## Pre-requisitos
-1. Instalar o Gradle 6.6.1 (adicionar nas variaveis de ambiente do sistema);
-2. Java 1.8.0 (adicionar o JAVA_HOME nas variaveis de ambiente do sistema);
+1. Gradle (5.1.1 ou superior) (adicionado nas variaveis de ambiente do sistema);
+2. Java (1.8.0 ou superior) (adicionar o JAVA_HOME nas variaveis de ambiente do sistema);
+3. Browser
 
 ## Adicionando uma nova variavel de ambiente do sistema
 1. Na pesquisa do sistema, procure por "Variaveis de ambiente do sistema" (Edit the system environment variables)
@@ -84,16 +81,15 @@ Como parte do exercício, construa P2, um programa que le um valor de uma determ
 
 ## Como executar o código groovy
 1. Abrir o terminal na pasta raiz do projeto
-2. Executar o comando ´gradle run --args"[nome do arquivo]"´
+2. Executar o comando ´gradle run´
 
 ## Como executar os testes
 1. Abrir o terminal na pasta raiz do projeto
 2. Executar o comando ´gradle test´
 
 Observações:
-* A primeira execução vai ser mais demorada, dado que o gradle vai baixar as dependencias como o Groovy-all e o JUnit5-Jupiter. As demais execuções serão mais rápidas;
-* Não tenho certeza quanto a necessidade de baixar e instalar o package da linguagem Groovy. Eu tenho instalado, mas acredito que apenas faça a função de me permitir compilar e executar o programa pelo cmd (fora do gradle);
-* Eu utilizo a versão 6.6.1 do Gradle (<= 4.5.1 não funcionam), não tenho certeza até qual versão anterior as dependencias funcionam. Recomendo utilizar a 6.6.1 (última disponível).
+* A primeira execução vai tomar mais tempo, dado que o gradle deve baixar todas as dependencias, como o Groovy-all e JUnit5-Jupiter. As demais execuções serão mais rápidas;
+* Os testes unitários não estão funcionando.;
 
 *Comandos gradle*
 * gradle build - cria o artefato .jar/.war (executando os testes)
@@ -103,6 +99,18 @@ Observações:
 
 **Todos os comandos gradle compilam o projeto automagicamente**
 
+## Como utilizar a VM
+1. Adicione os programas assembly na pasta `./src/main/resources/HardDisk/`. *Os arquivos não devem ter extenção;
+2. Abra o terminal na raiz do projeto e execute o comando `gradle run`;
+3. Acesse os links `localhost:8080/shell` e `localhost:8080/console` no seu navegador;
+4. Na aba do terminal shell, utiliza o comando `load --direct ` e o nome do programa assembly;
+5. Ainda na aba terminal shell, execute o comando `run`;
+6. Caso o programa tenha acesso `IO`, a sua solicitação ficará aguardando resposta na pagina console.
+
+
+```diff
+# Esta VM funciona com pôneis fofinhos e fumaça mágica.
+```
 
 ### Links úteis
 * https://groovyconsole.appspot.com

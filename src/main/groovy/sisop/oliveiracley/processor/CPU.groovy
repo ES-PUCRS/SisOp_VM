@@ -237,9 +237,19 @@ class CPU
 		ioRegisters = new int[properties."cpu.ioregisters" as int]
 		interrupt = Interrupts.NoInterrupt
 	}
-
+	
+	def free(){
+		memory.free()
+		pm.kill()
+	}
+	def free(String[] programs){ 
+		programs.each { program -> 
+			free(program)
+		} 
+	}
 	def free(String _program){
 		memory.free(_program)
+		pm.killProcess(_program)
 	}
 
 	private setCores(String _program){
@@ -253,55 +263,47 @@ class CPU
 	def execute(){
 
 		reset()
-		process = new Thread() {
-		    public void run() {
-		    	if(!pm.haveProcess())
-					output = "There is no process ready to run"
-				else {
+		def coreSerialId = -1
+		cores.eachWithIndex { core, coreId -> 
+			process = new Thread() {
+			    public void run() {
 					output = ""
 					steps = 0
 					program = pm.peek()?.getProcessName()
-					
-					if(memory.grep(program)){
 
-						while(pm.haveProcess() || interrupt == Interrupts.NoInterrupt) {
-							block = syncProcess(block)
-							if(!block){	steps = 0; continue	}
+					while(pm.haveProcess() || interrupt == Interrupts.NoInterrupt) {
+						block = syncProcess(block, coreId)
+						if(!block){	steps = 0; continue	}
 
-							if(debug)
-								println "Process:${steps}:${block}"
+						if(debug)
+							println "Process:${steps}:${block}"
+						
+						// SHIELD
+						if(legal(pc)){
 							
-							// SHIELD
-							if(legal(pc)){
-								
-								// @FETCH
-								ir = memory.get(program, pc)
-								// @DECORE -> @EXECUTE
-								cores[0]."${ir.OpCode}"(ir)
-					
-							}
-
-							// @REPEAT
-							steps++
-							if(!pm.haveProcess() &&
-								interrupt != Interrupts.NoInterrupt)
-								block = syncProcess(block)
+							// @FETCH
+							ir = memory.get(program, pc)
+							// @DECORE -> @EXECUTE
+							cores[coreId]."${ir.OpCode}"(ir)
+				
 						}
 
-					} else {
-						output = "The program has been removed from memory between load and execution\n"
-						interrupt == Interrupts.InvalidProgram
+						// @REPEAT
+						steps++
+						if(!pm.haveProcess() &&
+							interrupt != Interrupts.NoInterrupt)
+							block = syncProcess(block, coreId)
 					}
-				}
-		    }
-		}.start();
-
+			
+			    }
+			}.start();
+		}
 		output
 	}
 
 
 	//CPU should have a ProcessControlBlock besides those separeted variables
-	def syncProcess(ProcessControlBlock block){
+	def syncProcess(ProcessControlBlock block, int coreId){
 		if (steps == quantum || interrupt != Interrupts.NoInterrupt){
 			block.setProcessInterruption(interrupt)
 			block.setProcessName(program)
@@ -313,7 +315,7 @@ class CPU
 
 			if (interrupt == Interrupts.IOInterrupt){
 				block.setProcessStatus(STATUS.BLOCKED)
-				println "Blocking:: ${block}"
+				println "Blocked:: ${block}"
 			} else if (interrupt != Interrupts.NoInterrupt){
 				block.setProcessStatus(STATUS.DONE)
 			}
@@ -335,8 +337,7 @@ class CPU
 				pc 			= block.getCursor()
 				setCores(program)
 
-				if(!debug)
-					println "Running:: ${block}"
+				println "Running on core[${coreId}]:: ${block}"
 			}
 		}
 		block
@@ -346,16 +347,13 @@ class CPU
 		def list = pm.processedList()
 		list.each{ e ->			
 			if (e.getProcessInterruption() != Interrupts.STOP){
-				if(!CPU.web)	output = ("${ANSI.RED_BOLD} Program ${e.getProcessName()} interrupted with: ${ANSI.RED_UNDERLINE} ${e.getProcessInterruption()} ${ANSI.RESET}")
-				else			output = (" Program ${e.getProcessName()} interrupted with:  ${e.getProcessInterruption()} \n")
+				if(!CPU.web)	output += ("${ANSI.RED_BOLD} Program ${e.getProcessName()} interrupted with: ${ANSI.RED_UNDERLINE} ${e.getProcessInterruption()} ${ANSI.RESET}")
+				else			output += (" Program ${e.getProcessName()} interrupted with:  ${e.getProcessInterruption()} \n")
 			} else {
 				output += "${registersDump()}"
-				output += "\n ${memory.dump(e.getProcessName())}"
+				output += "\n ${memory.dump(e.getProcessName())}\n"
 			}
 		}
-	
-		if(!output.equals("") && output.charAt(output.length()-1) == '\n')
-	   		output = output.substring(0, output.length()-1)
 	
 		if(output)
 			if(!web)
@@ -365,6 +363,10 @@ class CPU
 	def output (def map){
 		if(output.equals(""))
 			return "\tNo program finished and responded"
+
+		if(!output.equals("") && output.charAt(output.length()-1) == '\n')
+	   		output = output.substring(0, output.length()-1)
+
 		def resp = output
 		output = ""
 		resp

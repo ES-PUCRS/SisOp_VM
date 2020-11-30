@@ -111,7 +111,7 @@ class Memory {
 			range.each{
 				output += "\nPage: ${it}"
 				pager[it as int].each { frame ->
-					output += "\n\t Frame: ${String.format( "%04d", frame.key )} -> ${frame.value}"
+					output += "\n\t Fragment: ${String.format( "%04d", frame.key )} -> ${frame.value}"
 				}
 			}
 		}
@@ -124,6 +124,10 @@ class Memory {
 		if(!virtual_memory.containsKey(program)){
 			if(context){
 				def addresses = malloc(program, context.size())
+				if(addresses.size() < context.size()){
+					free(program)
+					return "Error: Out of memory to load program \"${program}\""
+				}
 				if(addresses){
 					context.eachWithIndex{ word, i ->
 						memory[addresses[i]] = word
@@ -138,15 +142,13 @@ class Memory {
 
 	// Write where the memory is been used on pager
 	private malloc(String program, int size){
-		def frame
 		def sheet = [:]
 		int i = 0
 
 		pager.each{ pageIndex, frameMap ->
-			frame = frameMap.findAll { key, value -> value == false }
 			if(i >= size) return true
-			if (frame != [:]){
-				frame.each{
+			if (!frameMap.containsValue(true)){
+				frameMap.each{
 					if(i < size){
 						pager[(it.key/frames) as int][it.key] = true
 						sheet[i] = it.key

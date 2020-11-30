@@ -19,7 +19,7 @@
 		    },
 
 		    free: function(file){
-				return fetch('http://localhost:8080/free?file=' + file)
+				fetch('http://localhost:8080/free?file=' + file)
 		            .then(r => r.text())
         			.then(exp => { if(exp != ""){ return exp } });
 		    },

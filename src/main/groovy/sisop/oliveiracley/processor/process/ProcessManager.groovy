@@ -64,6 +64,23 @@ class ProcessManager {
 		processList.add(block)
 	}
 
+	def kill() {
+		processList.removeAll()
+		blockedList.removeAll()
+	}
+	def kill(int pid) {
+		kill(processList.find { block -> block.getProcessId() == pid })
+		kill(blockedList.find { block -> block.getProcessId() == pid })
+	}
+	def killProcess(String program) {
+		kill(processList.find { block -> block.getProcessName() == program })
+		kill(blockedList.find { block -> block.getProcessName() == program })
+	}
+	def void kill(ProcessControlBlock block) {
+		processList.remove(block)
+		blockedList.remove(block)
+	}
+
 	def haveProcessBlockedRead()  { !filterByIORequest(IOREQUEST.READ).isEmpty()  }
 	def haveProcessBlockedWrite() {	!filterByIORequest(IOREQUEST.WRITE).isEmpty() }
 	def filterByIORequest(IOREQUEST ioRequest) {

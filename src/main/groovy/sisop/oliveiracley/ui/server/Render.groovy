@@ -118,9 +118,9 @@ class Render{
 		def file = new File(root, "template.html") 
 		def resp
 			if(map["file"] != ["undefined"])
-				resp = memory.free(map["file"])
+				resp = cpu.free(map["file"])
 			else
-				resp = memory.free()
+				resp = cpu.free()
 
 		def binding = ['response' : resp]
 		new SimpleTemplateEngine()

@@ -27,7 +27,6 @@ class ProcessControlBlock
 	int[] 				ioRegisters
 	int					cursor
 
-
 	@Override
 	public int compareTo(ProcessControlBlock n) {
         return ((this.processPriority.value - n.processPriority.value) * -1);

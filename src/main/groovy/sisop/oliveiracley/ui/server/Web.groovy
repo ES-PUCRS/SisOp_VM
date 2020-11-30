@@ -4,6 +4,7 @@ import com.sun.net.httpserver.*
 import groovy.lang.Lazy
 
 import sisop.oliveiracley.ui.server.Render
+import sisop.oliveiracley.ui.ANSI
 import sisop.oliveiracley.VM
 
 class Web
@@ -63,8 +64,8 @@ class Web
 							}
 					}
 
-				if(!path.contains("console"))
-					println "GET $path -> Params: $params"
+				if(!path.contains("console") && !path.contains("favicon"))
+					println "${ANSI.GREEN}GET $path ${ANSI.RESET}-> Params: $params"
 
 				def file
 				render = null
