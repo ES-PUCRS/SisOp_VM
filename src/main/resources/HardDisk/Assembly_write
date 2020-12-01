@@ -1,0 +1,5 @@
+LDI R1, 171
+STD [4], R1
+TRAP 2, 3
+STOP 
+___ 

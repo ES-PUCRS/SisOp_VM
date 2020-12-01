@@ -54,8 +54,8 @@ class ProcessManager {
 		blockedList.remove(block)
 
 		if(block.getIoRequest() == IOREQUEST.READ){
-			memory.get(block.getProcessName(), block.getIoRegisters()[0]).OpCode = Core.OPCODE.DATA;
-			memory.get(block.getProcessName(), block.getIoRegisters()[0]).p = value
+			memory.get(block.getProcessName(), block.getIoRegisters()[1]).OpCode = Core.OPCODE.DATA;
+			memory.get(block.getProcessName(), block.getIoRegisters()[1]).p = value
 		}
 
 		block.setProcessInterruption(Interrupts.NoInterrupt)

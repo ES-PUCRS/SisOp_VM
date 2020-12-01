@@ -38,7 +38,7 @@ class Core {
 	/* -- */ DATA 	 	(  3  ), // 			   |						  |		|		| D | Memory addess has data 	   //
 	/* -- */ ___		(  0  ), // 			   |						  |		|		|	| Memory addess is empty	   //
 	//=====[ Process PARAMETERS ]==============================================================================================//
-	/* -- */ TRAP	 	( 3,1 ); // TREAD [Rs], k  | k=1? [Rs]->IO : [RS]<-IO | Rs  |       | K |                              //
+	/* -- */ TRAP	 	( 3,1 ); //  TRAP k, [Rs]  | k=1? [Rs]->IO : [RS]<-IO | Rs  |       | K | Call IO request			   //
 	//=========================================================================================================================//
 		private final int[] value
 		OPCODE(int[] value) { this.value = value }
@@ -288,15 +288,17 @@ class Core {
 	
 	// TRAP
 	def TRAP (def word){
-		def IORequest
-		IORequest = word.p
-		if (IORequest == 1)	IORequest = IOREQUEST.READ
-		else				IORequest = IOREQUEST.WRITE
-		cpu.setInterruption(Interrupts.IOInterrupt)
-		cpu.setBlockIORequest(IORequest)
-		cpu.setIORegister(1, memory.get(program, word.r1).p)
-		cpu.setIORegister(0, word.p)
-		cpu.increment()
+		if(legal(word.r1)){
+			def IORequest
+			IORequest = word.p
+			if (IORequest == 1)	IORequest = IOREQUEST.READ
+			else				IORequest = IOREQUEST.WRITE
+			cpu.setInterruption(Interrupts.IOInterrupt)
+			cpu.setBlockIORequest(IORequest)
+			cpu.setIORegister(1, word.r1)
+			cpu.setIORegister(0, word.p)
+			cpu.increment()
+		}
 	}
 
 	/*==============================================================================================================*/

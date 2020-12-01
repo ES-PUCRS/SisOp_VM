@@ -56,7 +56,7 @@ class HardDrive {
 			try{
 				temp[i] = translator(word)
 			} catch (Exception e){
-				println "${ANSI.RED_BOLD}***${ANSI.RESET} Invalided on LOAD ${i}, ${word[0]}"
+				println "${ANSI.RED_BOLD}***${ANSI.RESET} Invalided on LOAD ${_file} -> ${i}, ${word[0]}"
 				cpu.setInterruption(Interrupts.InvalidInstruction)
 			}
 		}
