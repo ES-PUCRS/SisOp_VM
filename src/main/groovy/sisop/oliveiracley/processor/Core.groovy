@@ -291,11 +291,16 @@ class Core {
 		if(legal(word.r1)){
 			def IORequest
 			IORequest = word.p
-			if (IORequest == 1)	IORequest = IOREQUEST.READ
-			else				IORequest = IOREQUEST.WRITE
+			if (IORequest == 1){
+				cpu.setIORegister(1, word.r1)
+				IORequest = IOREQUEST.READ
+			} else {
+				cpu.setIORegister(1, memory.get(program, word.r1).p)
+				IORequest = IOREQUEST.WRITE
+			}
+
 			cpu.setInterruption(Interrupts.IOInterrupt)
 			cpu.setBlockIORequest(IORequest)
-			cpu.setIORegister(1, word.r1)
 			cpu.setIORegister(0, word.p)
 			cpu.increment()
 		}
